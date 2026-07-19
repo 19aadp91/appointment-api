@@ -1,7 +1,9 @@
 package com.medisalud.appointment.infrastructure.global;
 
+import com.medisalud.appointment.application.commands.appointment.cancel.CancelAppointmentHandler;
 import com.medisalud.appointment.application.commands.appointment.create.CreateAppointmentHandler;
 import com.medisalud.appointment.application.commands.appointment.search.SearchAvailableSlotsHandler;
+import com.medisalud.appointment.application.ports.input.appointment.CancelAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
@@ -21,5 +23,11 @@ public class AppointmentConfig {
     @Bean
     public SearchAvailableSlotsUseCase searchAvailableSlotsUseCase(AppointmentOutputPort appointmentOutputPort) {
         return new SearchAvailableSlotsHandler(appointmentOutputPort);
+    }
+
+    @Bean
+    @Transactional
+    public CancelAppointmentUseCase cancelAppointmentUseCase(AppointmentOutputPort appointmentOutputPort) {
+        return new CancelAppointmentHandler(appointmentOutputPort);
     }
 }

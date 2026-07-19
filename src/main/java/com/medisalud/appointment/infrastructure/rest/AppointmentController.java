@@ -1,6 +1,7 @@
 package com.medisalud.appointment.infrastructure.rest;
 
 import com.medisalud.appointment.application.commands.appointment.create.CreateAppointmentCommand;
+import com.medisalud.appointment.application.ports.input.appointment.CancelAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
 import com.medisalud.appointment.domain.wrapper.ApiResponse;
@@ -22,6 +23,7 @@ public class AppointmentController {
 
     private final CreateAppointmentUseCase createAppointmentUseCase;
     private final SearchAvailableSlotsUseCase searchAvailableSlotsUseCase;
+    private final CancelAppointmentUseCase cancelAppointmentUseCase;
 
     @PostMapping
     public ResponseEntity<ApiResponse<UUID>> createAppointment(@Valid @RequestBody CreateAppointmentCommand command) {
@@ -38,5 +40,11 @@ public class AppointmentController {
             
         List<LocalDateTime> slots = searchAvailableSlotsUseCase.execute(doctorId, startDate, endDate);
         return ResponseEntity.ok(ApiResponse.success(slots, "Available slots retrieved successfully."));
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancelAppointment(@PathVariable UUID id) {
+        cancelAppointmentUseCase.execute(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Appointment canceled successfully. Penalties checked."));
     }
 }
