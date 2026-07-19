@@ -1,4 +1,4 @@
-package com.medisalud.appointment.application.ports.output.commands.doctor.create;
+package com.medisalud.appointment.application.commands.doctor.create;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,12 +12,12 @@ public record CreateDoctorCommand(
         String fullName,
 
         @NotBlank(message = "Specialty is required.")
-        @Size(min = 3, max = 100, message = "Specialty Debe tener entre 3 y 100 caracteres.")
+    @Size(max = 100, message = "Specialty No debe exceder los 100 caracteres.")
         String specialty,
 
         @Size(max = 20, message = "Phone no debe exceder los 20 caracteres.")
         @Pattern(
-                regexp = "^[+0-9\\-() ]*$",
+                regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$",
                 message = "El formato de Phone no es válido."
         )
         String phone,

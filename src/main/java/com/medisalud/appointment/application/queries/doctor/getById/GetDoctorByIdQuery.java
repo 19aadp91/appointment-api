@@ -1,4 +1,4 @@
-package com.medisalud.appointment.application.ports.output.queries.doctor.getById;
+package com.medisalud.appointment.application.queries.doctor.getById;
 
 import jakarta.validation.constraints.NotNull;
 

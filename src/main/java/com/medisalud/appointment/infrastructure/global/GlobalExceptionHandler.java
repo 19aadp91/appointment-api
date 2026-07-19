@@ -3,6 +3,8 @@ package com.medisalud.appointment.infrastructure.global;
 import com.medisalud.appointment.domain.exceptions.DomainException;
 import com.medisalud.appointment.domain.exceptions.ValidationAppException;
 import com.medisalud.appointment.domain.wrapper.ApiResponse;
+import com.medisalud.appointment.infrastructure.exceptions.InfrastructureException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,5 +42,27 @@ public class GlobalExceptionHandler {
         }
         ApiResponse<Void> response = ApiResponse.failed(ex.getMessage(), errorList);
         return ResponseEntity.status(ex.getStatusCode()).body(response);
+    }
+
+    @ExceptionHandler(InfrastructureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInfrastructureException(InfrastructureException ex) {
+        String clientMessage = "An unexpected technical error occurred. Please try again later.";
+        List<String> technicalDetails = List.of(
+            String.format("Error details: %s", ex.getMessage())
+        );
+
+        ApiResponse<Void> response = ApiResponse.failed(clientMessage, technicalDetails);
+        
+        return ResponseEntity.status(ex.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
+        ApiResponse<Void> response = ApiResponse.failed(
+            "A critical internal server error occurred.", 
+            List.of("Unexpected system failure.")
+        );
+        
+        return ResponseEntity.status(500).body(response);
     }
 }
