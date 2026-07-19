@@ -22,4 +22,10 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
             @Param("start") LocalDateTime start, 
             @Param("end") LocalDateTime end,
             @Param("status") AppointmentStatus status);
+
+       boolean existsByDoctorDoctorIdAndAppointmentDatetimeAndStatus(
+       UUID doctorId, 
+       LocalDateTime dateTime, 
+       com.medisalud.appointment.domain.enums.AppointmentStatus status
+       );
 }

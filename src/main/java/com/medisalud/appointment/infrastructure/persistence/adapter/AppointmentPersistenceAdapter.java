@@ -120,4 +120,13 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
             throw new InfrastructureException(e.getMessage(),500);
         }
     }
+
+    @Override
+    public boolean isDoctorOccupiedAt(UUID doctorId, LocalDateTime dateTime) {
+        return repository.existsByDoctorDoctorIdAndAppointmentDatetimeAndStatus(
+            doctorId, 
+            dateTime, 
+            com.medisalud.appointment.domain.enums.AppointmentStatus.PROGRAMMED
+        );
+    }
 }

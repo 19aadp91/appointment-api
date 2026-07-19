@@ -2,9 +2,11 @@ package com.medisalud.appointment.infrastructure.global;
 
 import com.medisalud.appointment.application.commands.appointment.cancel.CancelAppointmentHandler;
 import com.medisalud.appointment.application.commands.appointment.create.CreateAppointmentHandler;
+import com.medisalud.appointment.application.commands.appointment.reschedule.RescheduleAppointmentHandler;
 import com.medisalud.appointment.application.commands.appointment.search.SearchAvailableSlotsHandler;
 import com.medisalud.appointment.application.ports.input.appointment.CancelAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
+import com.medisalud.appointment.application.ports.input.appointment.RescheduleAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
 import org.springframework.context.annotation.Bean;
@@ -29,5 +31,11 @@ public class AppointmentConfig {
     @Transactional
     public CancelAppointmentUseCase cancelAppointmentUseCase(AppointmentOutputPort appointmentOutputPort) {
         return new CancelAppointmentHandler(appointmentOutputPort);
+    }
+
+    @Bean
+    @Transactional
+    public RescheduleAppointmentUseCase rescheduleAppointmentUseCase(AppointmentOutputPort appointmentOutputPort) {
+        return new RescheduleAppointmentHandler(appointmentOutputPort);
     }
 }

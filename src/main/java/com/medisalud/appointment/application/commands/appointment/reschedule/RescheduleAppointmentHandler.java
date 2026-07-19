@@ -1,0 +1,45 @@
+package com.medisalud.appointment.application.commands.appointment.reschedule;
+
+import com.medisalud.appointment.application.ports.input.appointment.RescheduleAppointmentUseCase;
+import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
+import com.medisalud.appointment.application.commands.appointment.create.CreateAppointmentCommand;
+import com.medisalud.appointment.application.commands.appointment.create.CreateAppointmentHandler;
+import com.medisalud.appointment.application.commands.appointment.cancel.CancelAppointmentHandler;
+import com.medisalud.appointment.domain.exceptions.BusinessException;
+import com.medisalud.appointment.domain.model.Appointment;
+
+import java.util.UUID;
+
+public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCase {
+
+    private final AppointmentOutputPort appointmentOutputPort;
+    // Reutilizamos los handlers existentes para asegurar que se ejecuten TODAS sus reglas de negocio y penalizaciones
+    private final CancelAppointmentHandler cancelHandler;
+    private final CreateAppointmentHandler createHandler;
+
+    public RescheduleAppointmentHandler(AppointmentOutputPort appointmentOutputPort) {
+        this.appointmentOutputPort = appointmentOutputPort;
+        this.cancelHandler = new CancelAppointmentHandler(appointmentOutputPort);
+        this.createHandler = new CreateAppointmentHandler(appointmentOutputPort);
+    }
+
+    @Override
+    public UUID execute(RescheduleAppointmentCommand command) {
+        Appointment oldAppointment = appointmentOutputPort.findById(command.appointmentId())
+                .orElseThrow(() -> new BusinessException(String.format("Appointment with ID '%s' not found.", command.appointmentId())));
+
+        if (appointmentOutputPort.isDoctorOccupiedAt(oldAppointment.getDoctorId(), command.newScheduledAt())) {
+            throw new BusinessException("The doctor is not available at the requested new time slot.");
+        }
+
+        cancelHandler.execute(command.appointmentId());
+
+        CreateAppointmentCommand createCommand = new CreateAppointmentCommand(
+                oldAppointment.getPatientId(),
+                oldAppointment.getDoctorId(),
+                command.newScheduledAt()
+        );
+
+        return createHandler.execute(createCommand);
+    }
+}

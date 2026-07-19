@@ -17,4 +17,5 @@ public interface AppointmentOutputPort {
     void cancelAppointment(UUID appointmentId, java.time.LocalDateTime cancellationTime);
     void registerPenalty(UUID appointmentId, UUID patientId, String reason);
     long countPenaltiesInLast30Days(UUID patientId, java.time.LocalDateTime since);
+    boolean isDoctorOccupiedAt(UUID doctorId, java.time.LocalDateTime dateTime);
 }
