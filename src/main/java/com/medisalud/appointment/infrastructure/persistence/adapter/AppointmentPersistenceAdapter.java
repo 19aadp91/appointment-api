@@ -12,6 +12,9 @@ import com.medisalud.appointment.infrastructure.persistence.repository.SpringDat
 import com.medisalud.appointment.infrastructure.persistence.repository.SpringDataPatientRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -49,5 +52,10 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);
         }
+    }
+
+    @Override
+    public List<LocalDateTime> findBookedTimesByDoctorAndRange(UUID doctorId, LocalDateTime start, LocalDateTime end) {
+        return repository.findBookedDatetimes(doctorId, start, end, com.medisalud.appointment.domain.enums.AppointmentStatus.PROGRAMMED);
     }
 }

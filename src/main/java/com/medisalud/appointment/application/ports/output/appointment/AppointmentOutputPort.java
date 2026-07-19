@@ -1,9 +1,14 @@
 package com.medisalud.appointment.application.ports.output.appointment;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import com.medisalud.appointment.domain.model.Appointment;
 
 public interface AppointmentOutputPort {
     Appointment save(Appointment appointment);
-    boolean patientExists(java.util.UUID patientId);
-    boolean doctorExists(java.util.UUID doctorId);
+    boolean patientExists(UUID patientId);
+    boolean doctorExists(UUID doctorId);
+    List<LocalDateTime> findBookedTimesByDoctorAndRange(UUID doctorId, LocalDateTime start, LocalDateTime end);
 }
