@@ -1,46 +1,15 @@
 package com.medisalud.appointment.domain.model;
 
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public class Doctor {
-
-    private UUID id;
-    private String fullName;
-    private String specialty;
-    private String phone;
-    private String email;
-
-    public Doctor(
-            UUID id,
-            String fullName,
-            String specialty,
-            String phone,
-            String email) {
-
-        this.id = id;
-        this.fullName = fullName;
-        this.specialty = specialty;
-        this.phone = phone;
-        this.email = email;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public String getSpecialty() {
-        return specialty;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
+    private final UUID id;
+    private final String fullName;
+    private final String specialty;
+    private final String phone;
+    private final String email;
 }

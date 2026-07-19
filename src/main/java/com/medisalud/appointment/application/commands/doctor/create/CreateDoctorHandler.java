@@ -8,8 +8,6 @@ import com.medisalud.appointment.application.ports.output.doctor.DoctorOutputPor
 import com.medisalud.appointment.domain.exceptions.BusinessException;
 import com.medisalud.appointment.domain.model.Doctor;
 
-import jakarta.transaction.Transactional;
-
 public class CreateDoctorHandler implements CreateDoctorUseCase {
 
     private final DoctorOutputPort doctorOutputPort;
@@ -19,7 +17,6 @@ public class CreateDoctorHandler implements CreateDoctorUseCase {
     }
 
     @Override
-    @Transactional
     public UUID execute(CreateDoctorCommand command) {
         
         if (doctorOutputPort.existsByEmail(command.email())) {
