@@ -11,6 +11,7 @@ import com.medisalud.appointment.domain.exceptions.ValidationAppException;
 import com.medisalud.appointment.domain.wrapper.ApiResponse;
 import com.medisalud.appointment.infrastructure.exceptions.InfrastructureException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ApiResponse<Void>> handleDomainException(DomainException ex) {
-        List<String> errorList = List.of("");
+        List<String> errorList = new ArrayList<>();
         if (ex instanceof ValidationAppException validationEx) {
             errorList = validationEx.getErrors();
         }
