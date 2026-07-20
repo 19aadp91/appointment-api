@@ -4,6 +4,7 @@ import com.medisalud.appointment.application.ports.input.appointment.SearchAvail
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
 import com.medisalud.appointment.domain.exceptions.BusinessException;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,7 +17,8 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
     private final AppointmentOutputPort appointmentOutputPort;
     
     private static final LocalTime START_WORK_HOUR = LocalTime.of(8, 0);
-    private static final LocalTime END_WORK_HOUR = LocalTime.of(18, 0);
+    private static final LocalTime END_WEEKDAY_HOUR = LocalTime.of(18, 0); // Lunes a Viernes
+    private static final LocalTime END_SATURDAY_HOUR = LocalTime.of(13, 0); // Sábados
     private static final int SLOT_DURATION_MINUTES = 30;
 
     public SearchAvailableSlotsHandler(AppointmentOutputPort appointmentOutputPort) {
@@ -32,16 +34,27 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
             throw new BusinessException(String.format("Doctor with ID '%s' does not exist.", doctorId));
         }
 
-        LocalDateTime startDateTime = startDate.atTime(START_WORK_HOUR);
-        LocalDateTime endDateTime = endDate.atTime(END_WORK_HOUR);
+        LocalDateTime dbStart = startDate.atTime(START_WORK_HOUR);
+        LocalDateTime dbEnd = endDate.atTime(END_WEEKDAY_HOUR);
 
-        List<LocalDateTime> bookedTimes = appointmentOutputPort.findBookedTimesByDoctorAndRange(doctorId, startDateTime, endDateTime);
+        List<LocalDateTime> bookedTimes = appointmentOutputPort.findBookedTimesByDoctorAndRange(doctorId, dbStart, dbEnd);
 
         List<LocalDateTime> availableSlots = new ArrayList<>();
         
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            
+            // 🚨 Ignorar domingos si no se trabaja
+            if (dayOfWeek == DayOfWeek.SUNDAY) {
+                continue;
+            }
+
+            LocalTime endWorkHourForDay = (dayOfWeek == DayOfWeek.SATURDAY) 
+                    ? END_SATURDAY_HOUR 
+                    : END_WEEKDAY_HOUR;
+
             LocalDateTime currentSlot = date.atTime(START_WORK_HOUR);
-            LocalDateTime endOfWorkDay = date.atTime(END_WORK_HOUR);
+            LocalDateTime endOfWorkDay = date.atTime(endWorkHourForDay);
 
             while (currentSlot.isBefore(endOfWorkDay)) {
                 if (!bookedTimes.contains(currentSlot)) {
