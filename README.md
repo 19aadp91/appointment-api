@@ -2,26 +2,30 @@
 
 Backend del sistema **Medisalud**, encargado de administrar el ciclo de vida de las citas médicas mediante una API REST.
 
-El proyecto fue desarrollado siguiendo principios de **Arquitectura Hexagonal**, **Domain-Driven Design (DDD)** y **Clean Code**, garantizando una solución desacoplada, mantenible, escalable y altamente testeable.
+El proyecto fue desarrollado siguiendo principios de **Arquitectura Hexagonal (Ports & Adapters)** con **CQRS**, aplicando rigurosamente **SOLID**, **DRY**, **nombres significativos** y **coherencia** en toda la base de código.
 
 ---
 
-# Características
+## Tecnologías y Versiones
 
-- Agendamiento de citas médicas.
-- Consulta de horarios disponibles.
-- Cancelación de citas.
-- Reprogramación de citas.
-- Validación de reglas de negocio.
-- Penalizaciones automáticas por cancelaciones tardías.
-- Arquitectura Hexagonal.
-- Pruebas unitarias.
+| Tecnología | Versión |
+|---|---|
+| **Java** | **21** (LTS) |
+| **Spring Boot** | **4.1.0** |
+| Spring Data JPA | Incluida en Spring Boot 4.1.0 |
+| Hibernate | Incluida en Spring Boot 4.1.0 |
+| Flyway | Incluida en Spring Boot 4.1.0 (`spring-boot-starter-flyway`) |
+| PostgreSQL (Driver) | Runtime |
+| Jakarta Validation | Incluida en Spring Boot 4.1.0 (`spring-boot-starter-validation`) |
+| Lombok | Última compatible |
+| Maven | 3.x (Maven Wrapper incluido) |
+| JUnit 5 + Mockito | Incluidas en Spring Boot 4.1.0 (scope test) |
 
 ---
 
-# Arquitectura
+## Arquitectura
 
-La solución implementa una **Arquitectura Hexagonal (Ports & Adapters)** donde el dominio permanece completamente aislado de cualquier tecnología externa.
+La solución implementa una **Arquitectura Hexagonal (Ports & Adapters)** combinada con el patrón **CQRS (Command Query Responsibility Segregation)**, donde los **Commands** (escritura) y **Queries** (lectura) se separan en handlers distintos, cada uno con su propio puerto de entrada.
 
 ```mermaid
 flowchart LR
@@ -48,50 +52,257 @@ Output --> Persistence
 Persistence --> Database
 ```
 
-## Beneficios de esta arquitectura
+### CQRS en la práctica
 
-### Dominio independiente
+Los casos de uso se organizan separando **Commands** (operaciones de escritura) de **Queries** (operaciones de lectura):
 
-Las reglas críticas del negocio no dependen de Spring Boot, Hibernate ni PostgreSQL.
+```
+application/ports/
+├── input/
+│   ├── appointment/     ← Puertos de entrada (interfaces de casos de uso)
+│   ├── doctor/
+│   └── patient/
+└── output/
+    ├── appointment/     ← Puertos de salida (interfaces de persistencia)
+    ├── doctor/
+    └── patient/
+```
 
-Esto permite cambiar cualquier tecnología sin modificar la lógica de negocio.
+Cada operación se encapsula en su propio **handler** dentro del paquete correspondiente, siguiendo la convención:
 
-### Alta mantenibilidad
+- `commands/<entidad>/<acción>/` → Handlers de escritura (crear, cancelar, reprogramar)
+- `queries/<entidad>/<acción>/` → Handlers de lectura (obtener, listar, buscar)
 
-Cada capa posee una única responsabilidad.
+### Principios de diseño aplicados
+
+| Principio | Aplicación en el proyecto |
+|---|---|
+| **S** — Single Responsibility | Cada handler tiene una única responsabilidad: un comando o una query |
+| **O** — Open/Closed | Los puertos (interfaces) permiten extender sin modificar el dominio |
+| **L** — Liskov Substitution | Las excepciones de dominio son intercambiables a través de `DomainException` |
+| **I** — Interface Segregation | Puertos de entrada y salida separados por entidad y operación |
+| **D** — Dependency Inversion | El dominio define interfaces; la infraestructura las implementa |
+| **DRY** | Lógica reutilizable centralizada; validaciones y mapeos sin duplicación |
+| **Nombres significativos** | Clases, métodos y variables con nombres autoexplicativos |
+| **Coherencia** | Convención uniforme en estructura de paquetes, nombrado y formato de respuestas |
+
+### Beneficios de esta arquitectura
+
+**Dominio independiente** — Las reglas críticas del negocio no dependen de Spring Boot, Hibernate ni PostgreSQL. Esto permite cambiar cualquier tecnología sin modificar la lógica de negocio.
+
+**Alta mantenibilidad** — Cada capa posee una única responsabilidad:
 
 - Controladores → HTTP
 - Casos de uso → Orquestación
 - Dominio → Reglas de negocio
 - Infraestructura → Persistencia
 
-### Alta capacidad de pruebas
+**Alta capacidad de pruebas** — El dominio puede probarse utilizando únicamente JUnit y Mockito, sin necesidad de levantar Spring Boot ni una base de datos.
 
-El dominio puede probarse utilizando únicamente JUnit y Mockito, sin necesidad de levantar Spring Boot ni una base de datos.
-
-### Transacciones consistentes
-
-Procesos complejos como la reprogramación de una cita se ejecutan de forma atómica, garantizando consistencia mediante rollback automático ante cualquier error.
+**Transacciones consistentes** — Procesos complejos como la reprogramación de una cita se ejecutan de forma atómica, garantizando consistencia mediante rollback automático ante cualquier error.
 
 ---
 
-# Tecnologías
+## Manejo de Excepciones
 
-| Tecnología | Versión |
-|------------|----------|
-| Java | 25 |
-| Spring Boot | 3.x |
-| Spring Data JPA | 3.x |
-| Hibernate | 6.x |
-| PostgreSQL | 16+ |
-| Maven | 3.x |
-| Jakarta Validation | Última |
-| JUnit 5 | Última |
-| Mockito | Última |
+El sistema implementa un **manejo centralizado de excepciones** a través de `GlobalExceptionHandler` (`@RestControllerAdvice`). Cada excepción se mapea a un código HTTP específico.
+
+### Jerarquía de excepciones
+
+```mermaid
+classDiagram
+    RuntimeException <|-- DomainException
+    RuntimeException <|-- InfrastructureException
+    DomainException <|-- BusinessException
+    DomainException <|-- ResourceNotFoundException
+    DomainException <|-- ResourceConflictException
+    DomainException <|-- ValidationAppException
+    InfrastructureException <|-- PersistenceException
+
+    class DomainException {
+        -int statusCode
+    }
+    class InfrastructureException {
+        -int httpStatus
+    }
+```
+
+### Tabla de excepciones y códigos HTTP
+
+| Excepción | Capa | HTTP Status | Cuándo se lanza |
+|---|---|---|---|
+| `BusinessException` | Dominio | `400 Bad Request` | Violación de una regla de negocio (ej: cita fuera de horario laboral, cita en domingo) |
+| `ValidationAppException` | Dominio | `400 Bad Request` | Errores de validación de campos (lista de errores en el body). También captura `MethodArgumentNotValidException` de Jakarta Validation |
+| `ResourceNotFoundException` | Dominio | `404 Not Found` | El recurso solicitado no existe (ej: doctor, paciente o cita no encontrada) |
+| `ResourceConflictException` | Dominio | `409 Conflict` | Conflicto con el estado actual del recurso (ej: horario ya ocupado, cita duplicada) |
+| `PersistenceException` | Infraestructura | `500 Internal Server Error` | Error al interactuar con la base de datos |
+| `InfrastructureException` | Infraestructura | Configurable (default `500`) | Error técnico genérico de infraestructura |
+| `Exception` (fallback) | Global | `500 Internal Server Error` | Cualquier excepción no controlada. Se registra como error crítico |
+
+### Formato de respuesta de error
+
+Todas las respuestas de error siguen el mismo formato estándar `ApiResponse`:
+
+```json
+{
+  "success": false,
+  "message": "Business validation failed.",
+  "data": null
+}
+```
+
+Para errores de validación, se incluye una lista de errores detallados:
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "data": [
+    "El campo patientId no puede ser nulo",
+    "La fecha debe ser futura"
+  ]
+}
+```
 
 ---
 
-# Estructura del proyecto
+## Arranque inicial con Flyway
+
+El proyecto utiliza **Flyway** para la gestión de migraciones de base de datos. Al iniciar la aplicación por primera vez, Flyway ejecuta automáticamente el script `V1__initial_schema.sql` que crea todo el esquema inicial.
+
+### Prerrequisitos
+
+1. **Java 21** instalado y configurado en el `PATH`
+2. **PostgreSQL** en ejecución (versión 16+)
+3. **Maven 3.x** (o usar el Maven Wrapper incluido `mvnw` / `mvnw.cmd`)
+
+### Paso 1 — Crear la base de datos
+
+Conectarse a PostgreSQL y crear la base de datos:
+
+```sql
+CREATE DATABASE medisaludDB;
+```
+
+> **Nota:** No es necesario crear tablas ni insertar datos manualmente. Flyway se encarga de todo.
+
+### Paso 2 — Configurar la conexión
+
+Editar el archivo `src/main/resources/application.properties`:
+
+```properties
+# Conexión a PostgreSQL
+spring.datasource.url=jdbc:postgresql://localhost:5432/medisaludDB
+spring.datasource.username=postgres
+spring.datasource.password=admin
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Flyway: aplica el baseline si la BD ya existe sin historial de migraciones
+spring.flyway.baseline-on-migrate=true
+spring.flyway.baseline-version=1
+
+# Hibernate solo VALIDA el esquema (Flyway se encarga de crearlo)
+spring.jpa.hibernate.ddl-auto=validate
+```
+
+### Paso 3 — Compilar y ejecutar
+
+```bash
+# Compilar el proyecto
+./mvnw clean package
+
+# Ejecutar la aplicación
+./mvnw spring-boot:run
+```
+
+o alternativamente:
+
+```bash
+java -jar target/appointment-api-0.0.1-SNAPSHOT.jar
+```
+
+### ¿Qué ocurre al arrancar?
+
+1. Spring Boot inicia y conecta con PostgreSQL.
+2. **Flyway** detecta que no existe la tabla `flyway_schema_history` y la crea automáticamente.
+3. Flyway escanea `src/main/resources/db/migration/` y encuentra `V1__initial_schema.sql`.
+4. Ejecuta el script que:
+   - Crea las tablas: `doctor`, `patient`, `appointment`, `penalty`
+   - Crea los índices de rendimiento
+   - Inserta datos iniciales de doctores de ejemplo
+   - Crea índices únicos parciales para evitar citas duplicadas
+5. **Hibernate** valida que las entidades JPA coincidan con el esquema creado por Flyway.
+6. La API queda disponible en `http://localhost:8080`.
+
+### Esquema creado por `V1__initial_schema.sql`
+
+```mermaid
+erDiagram
+    DOCTOR {
+        UUID doctor_id PK
+        VARCHAR full_name
+        VARCHAR specialty
+        VARCHAR phone
+        VARCHAR email
+        BIGINT version
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        BOOLEAN deleted
+    }
+
+    PATIENT {
+        UUID patient_id PK
+        VARCHAR full_name
+        VARCHAR document_number UK
+        VARCHAR phone
+        VARCHAR email UK
+        DATE birth_date
+        BIGINT version
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        BOOLEAN deleted
+    }
+
+    APPOINTMENT {
+        UUID appointment_id PK
+        UUID doctor_id FK
+        UUID patient_id FK
+        TIMESTAMP appointment_datetime
+        VARCHAR status
+        TIMESTAMP cancellation_datetime
+        BIGINT version
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        BOOLEAN deleted
+    }
+
+    PENALTY {
+        UUID penalty_id PK
+        UUID patient_id FK
+        UUID appointment_id FK
+        VARCHAR reason
+        TIMESTAMP created_at
+    }
+
+    DOCTOR ||--o{ APPOINTMENT : "atiende"
+    PATIENT ||--o{ APPOINTMENT : "agenda"
+    PATIENT ||--o{ PENALTY : "recibe"
+    APPOINTMENT ||--o| PENALTY : "genera"
+```
+
+### Datos iniciales incluidos
+
+La migración inserta **3 doctores** de ejemplo:
+
+| Nombre | Especialidad | Email |
+|---|---|---|
+| Dra. María González | Cardiología | maria.gonzalez@medisalud.com |
+| Dr. Carlos Ruiz | Pediatría | carlos.ruiz@medisalud.com |
+| Dra. Ana López | Dermatología | ana.lopez@medisalud.com |
+
+---
+
+## Estructura del proyecto
 
 ```
 ├── src/
@@ -100,99 +311,59 @@ Procesos complejos como la reprogramación de una cita se ejecutan de forma ató
 │   │   │   └── com/medisalud/appointment/
 │   │   │       ├── application/
 │   │   │       │   └── ports/
-│   │   │       │       ├── input/
-│   │   │       │       └── output/
-│   │   │       │           ├── commands/
-│   │   │       │           │   └── doctor/
-│   │   │       │           │       └── create/
-│   │   │       │           └── queries/
-│   │   │       │               └── doctor/
-│   │   │       │                   ├── get/
-│   │   │       │                   └── getById/
+│   │   │       │       ├── input/              ← Puertos de entrada (use cases)
+│   │   │       │       │   ├── appointment/
+│   │   │       │       │   ├── doctor/
+│   │   │       │       │   └── patient/
+│   │   │       │       └── output/             ← Puertos de salida (persistencia)
+│   │   │       │           ├── appointment/
+│   │   │       │           ├── doctor/
+│   │   │       │           └── patient/
 │   │   │       ├── domain/
-│   │   │       │   ├── enums/
-│   │   │       │   ├── errorMessage/
-│   │   │       │   ├── exceptions/
-│   │   │       │   ├── model/
-│   │   │       │   └── wrapper/
+│   │   │       │   ├── enums/                  ← Enumeraciones del dominio
+│   │   │       │   ├── errorMessage/           ← Mensajes de error centralizados
+│   │   │       │   ├── exceptions/             ← Excepciones de dominio
+│   │   │       │   ├── model/                  ← Modelos de dominio (entidades puras)
+│   │   │       │   └── wrapper/                ← ApiResponse wrapper
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── exceptions/
-│   │   │       │   ├── global/
+│   │   │       │   ├── exceptions/             ← Excepciones de infraestructura
+│   │   │       │   ├── global/                 ← GlobalExceptionHandler + Configs
 │   │   │       │   ├── persistence/
-│   │   │       │   │   ├── adapter/
-│   │   │       │   │   ├── entity/
-│   │   │       │   │   └── repository/
-│   │   │       │   └── rest/
+│   │   │       │   │   ├── adapter/            ← Adaptadores (implementan output ports)
+│   │   │       │   │   ├── entity/             ← Entidades JPA
+│   │   │       │   │   └── repository/         ← Repositorios Spring Data
+│   │   │       │   └── rest/                   ← Controladores REST
 │   │   │       └── AppointmentApiApplication.java
 │   │   └── resources/
-│   │       ├── db/
-│   │       │   └── migration/
-│   │       ├── static/
-│   │       └── templates/
+│   │       ├── application.properties
+│   │       └── db/
+│   │           └── migration/
+│   │               └── V1__initial_schema.sql  ← Migración inicial Flyway
 │   └── test/
 │       └── java/
-│           └── com/medisalud/appointment/
+│           └── com/medisalud/appointment/      ← Pruebas unitarias
 ```
 
 ---
 
-# Requisitos
+## Características
 
-- Java 25
-- Maven 3.x
-- PostgreSQL
-
----
-
-# Configuración
-
-Editar el archivo:
-
-```
-src/main/resources/application.properties
-```
-
-Configurar:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/medisalud
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
+- Agendamiento de citas médicas.
+- Consulta de horarios disponibles.
+- Cancelación de citas.
+- Reprogramación de citas.
+- Validación de reglas de negocio.
+- Penalizaciones automáticas por cancelaciones tardías.
+- Arquitectura Hexagonal con CQRS.
+- Pruebas unitarias.
 
 ---
 
-# Ejecución
+## Convención de respuestas
 
-## Compilar
+Todas las respuestas siguen el formato estándar `ApiResponse`:
 
-```bash
-./mvnw clean package
-```
-
-## Ejecutar
-
-```bash
-./mvnw spring-boot:run
-```
-
-o
-
-```bash
-java -jar target/medisalud-appointment-0.0.1-SNAPSHOT.jar
-```
-
-La API quedará disponible en
-
-```
-http://localhost:8080
-```
-
----
-
-# Convención de respuestas
-
-Todas las respuestas siguen el mismo formato.
+**Éxito:**
 
 ```json
 {
@@ -202,7 +373,7 @@ Todas las respuestas siguen el mismo formato.
 }
 ```
 
-Errores:
+**Error:**
 
 ```json
 {
@@ -214,33 +385,31 @@ Errores:
 
 ---
 
-# Endpoints
+## Endpoints
 
-## Obtener horarios disponibles
+### Obtener horarios disponibles
 
 Obtiene las franjas horarias disponibles para un médico dentro de un rango de fechas.
-
-### GET
 
 ```
 GET /api/v1/appointments/available-slots
 ```
 
-### Parámetros
+**Parámetros:**
 
 | Parámetro | Tipo |
-|------------|------|
+|---|---|
 | doctorId | UUID |
 | startDate | LocalDate |
 | endDate | LocalDate |
 
-Ejemplo:
+**Ejemplo:**
 
 ```
 GET /api/v1/appointments/available-slots?doctorId=d3b07384-d113-49cd-a5d6-8802d8471900&startDate=2026-08-22&endDate=2026-08-22
 ```
 
-Respuesta
+**Respuesta:**
 
 ```json
 {
@@ -256,9 +425,7 @@ Respuesta
 
 ---
 
-## Agendar cita
-
-### POST
+### Agendar cita
 
 ```
 POST /api/v1/appointments
@@ -272,7 +439,7 @@ POST /api/v1/appointments
 }
 ```
 
-Respuesta
+**Respuesta:**
 
 ```json
 {
@@ -284,15 +451,13 @@ Respuesta
 
 ---
 
-## Cancelar cita
-
-### PATCH
+### Cancelar cita
 
 ```
 PATCH /api/v1/appointments/{appointmentId}/cancel
 ```
 
-Respuesta
+**Respuesta:**
 
 ```json
 {
@@ -304,9 +469,7 @@ Respuesta
 
 ---
 
-## Reprogramar cita
-
-### POST
+### Reprogramar cita
 
 ```
 POST /api/v1/appointments/reschedule
@@ -319,7 +482,7 @@ POST /api/v1/appointments/reschedule
 }
 ```
 
-Respuesta
+**Respuesta:**
 
 ```json
 {
@@ -331,7 +494,7 @@ Respuesta
 
 ---
 
-# Reglas de negocio implementadas
+## Reglas de negocio implementadas
 
 - Un médico no puede tener dos citas en el mismo horario.
 - Un paciente no puede tener citas superpuestas.
@@ -344,7 +507,7 @@ Respuesta
 
 ---
 
-# Pruebas
+## Pruebas
 
 Ejecutar todas las pruebas:
 
@@ -354,15 +517,17 @@ Ejecutar todas las pruebas:
 
 ---
 
-# Principios aplicados
+## Principios aplicados
 
-- Arquitectura Hexagonal
+- Arquitectura Hexagonal (Ports & Adapters)
+- CQRS (Handlers separados para Commands y Queries)
 - Domain-Driven Design (DDD)
 - SOLID
+- DRY (Don't Repeat Yourself)
 - Clean Code
-- Ports & Adapters
+- Nombres significativos
+- Coherencia en estructura y convenciones
 - Dependency Inversion
-- CQRS (Handlers para Commands y Queries)
 - Validación mediante Jakarta Validation
 - Manejo centralizado de excepciones
 - Transacciones ACID
