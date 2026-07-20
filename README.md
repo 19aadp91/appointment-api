@@ -11,15 +11,15 @@ El proyecto fue desarrollado siguiendo principios de **Arquitectura Hexagonal (P
 | Tecnología | Versión |
 |---|---|
 | **Java** | **21** (LTS) |
-| **Spring Boot** | **4.1.0** |
-| Spring Data JPA | Incluida en Spring Boot 4.1.0 |
-| Hibernate | Incluida en Spring Boot 4.1.0 |
-| Flyway | Incluida en Spring Boot 4.1.0 (`spring-boot-starter-flyway`) |
+| **Spring Boot** | **3.5.16** |
+| Spring Data JPA | Incluida en Spring Boot 3.5.16 |
+| Hibernate | Incluida en Spring Boot 3.5.16 |
+| Flyway | `flyway-core` + `flyway-database-postgresql` (auto-configurado por Spring Boot) |
 | PostgreSQL (Driver) | Runtime |
-| Jakarta Validation | Incluida en Spring Boot 4.1.0 (`spring-boot-starter-validation`) |
+| Jakarta Validation | Incluida en Spring Boot 3.5.16 (`spring-boot-starter-validation`) |
 | Lombok | Última compatible |
 | Maven | 3.x (Maven Wrapper incluido) |
-| JUnit 5 + Mockito | Incluidas en Spring Boot 4.1.0 (scope test) |
+| JUnit 5 + Mockito | Incluidas en Spring Boot 3.5.16 (`spring-boot-starter-test`) |
 
 ---
 
