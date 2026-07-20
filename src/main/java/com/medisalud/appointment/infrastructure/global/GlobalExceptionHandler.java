@@ -57,9 +57,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InfrastructureException.class)
     public ResponseEntity<ApiResponse<Void>> handleInfrastructureException(InfrastructureException ex) {
-        String clientMessage = "An unexpected technical error occurred. Please try again later.";
+        String clientMessage = "Ocurrió un error técnico inesperado. Por favor, inténtelo de nuevo más tarde.";
         List<String> technicalDetails = List.of(
-                String.format("Error details: %s", ex.getMessage()));
+                String.format("Detalles del error: %s", ex.getMessage()));
 
         log.error("Infrastructure exception caught [Status: {}]: {}", ex.getHttpStatus(), ex.getMessage());
 
@@ -74,8 +74,8 @@ public class GlobalExceptionHandler {
         log.error("Critical internal server error unhandled by the application:", ex);
 
         ApiResponse<Void> response = ApiResponse.failed(
-                "A critical internal server error occurred.",
-                List.of("Unexpected system failure."));
+                "Ocurrió un error interno crítico en el servidor.",
+                List.of("Fallo inesperado del sistema."));
 
         return ResponseEntity.status(500).body(response);
     }

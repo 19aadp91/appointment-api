@@ -21,13 +21,13 @@ public class CreatePatientHandler implements CreatePatientUseCase {
         // 1. Uso de 409 Conflict por duplicación de documento de identidad
         if (patientOutputPort.existsByDocumentNumber(command.documentNumber())) {
             throw new ResourceConflictException(
-                String.format("A patient with document number '%s' already exists.", command.documentNumber()));
+                String.format("Ya existe un paciente con el número de documento '%s'.", command.documentNumber()));
         }
 
         // 2. Uso de 409 Conflict por duplicación de correo electrónico
         if (patientOutputPort.existsByEmail(command.email())) {
             throw new ResourceConflictException(
-                String.format("A patient with email '%s' already exists.", command.email()));
+                String.format("Ya existe un paciente con el correo electrónico '%s'.", command.email()));
         }
 
         Patient patient = PatientMapperAplication.toDomain(command);

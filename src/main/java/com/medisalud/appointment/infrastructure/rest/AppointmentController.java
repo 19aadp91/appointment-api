@@ -36,7 +36,7 @@ public class AppointmentController {
     @PostMapping
     public ResponseEntity<ApiResponse<UUID>> createAppointment(@Valid @RequestBody CreateAppointmentCommand command) {
         UUID appointmentId = createAppointmentUseCase.execute(command);
-        ApiResponse<UUID> response = ApiResponse.success(appointmentId,"Appointment scheduled successfully.");
+        ApiResponse<UUID> response = ApiResponse.success(appointmentId,"Cita programada con éxito.");
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -47,19 +47,19 @@ public class AppointmentController {
             @RequestParam LocalDate endDate) {
             
         List<LocalDateTime> slots = searchAvailableSlotsUseCase.execute(doctorId, startDate, endDate);
-        return ResponseEntity.ok(ApiResponse.success(slots, "Available slots retrieved successfully."));
+        return ResponseEntity.ok(ApiResponse.success(slots, "Horarios disponibles recuperados con éxito."));
     }
 
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<Void>> cancelAppointment(@PathVariable UUID id) {
         cancelAppointmentUseCase.execute(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Appointment canceled successfully. Penalties checked."));
+        return ResponseEntity.ok(ApiResponse.success(null, "Cita cancelada con éxito. Penalizaciones verificadas."));
     }
 
     @PostMapping("/reschedule")
     public ResponseEntity<ApiResponse<UUID>> rescheduleAppointment(@Valid @RequestBody RescheduleAppointmentCommand command) {
         UUID newAppointmentId = rescheduleAppointmentUseCase.execute(command);
-        return ResponseEntity.ok(ApiResponse.success(newAppointmentId,"Appointment rescheduled successfully."));
+        return ResponseEntity.ok(ApiResponse.success(newAppointmentId,"Cita reprogramada con éxito."));
     }
 
     @GetMapping
@@ -72,6 +72,6 @@ public class AppointmentController {
             
         List<Appointment> appointments = filterAppointmentsUseCase.execute(doctorId, patientId, status, startDate, endDate);
         
-        return ResponseEntity.ok(ApiResponse.success(appointments, "Appointments filtered successfully."));
+        return ResponseEntity.ok(ApiResponse.success(appointments, "Citas filtradas con éxito."));
     }
 }

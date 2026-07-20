@@ -79,7 +79,7 @@ class FilterAppointmentsHandlerTest {
                 filterAppointmentsHandler.execute(doctorId, patientId, status, invalidStartDate, invalidEndDate)
         );
 
-        assertEquals("The start date cannot be after the end date.", exception.getMessage());
+        assertEquals("La fecha de inicio no puede ser posterior a la fecha de fin.", exception.getMessage());
 
         // Cortocircuito: Al fallar la validación de fechas, nunca debe ir al puerto de salida (DB)
         verify(appointmentOutputPort, never()).findAppointmentsByFilters(any(), any(), any(), any(), any());
@@ -97,7 +97,7 @@ class FilterAppointmentsHandlerTest {
                 filterAppointmentsHandler.execute(doctorId, patientId, status, startDate, endDate)
         );
 
-        assertEquals("No appointments found for the given filters.", exception.getMessage());
+        assertEquals("No se encontraron citas para los filtros proporcionados.", exception.getMessage());
         
         verify(appointmentOutputPort, times(1))
                 .findAppointmentsByFilters(doctorId, patientId, status, startDate, endDate);

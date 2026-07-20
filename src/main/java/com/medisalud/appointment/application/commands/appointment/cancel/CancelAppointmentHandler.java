@@ -24,14 +24,14 @@ public class CancelAppointmentHandler implements CancelAppointmentUseCase {
         // 1. Uso de 404 Not Found si la cita no existe
         Appointment appointment = appointmentOutputPort.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Appointment with ID '%s' not found.", appointmentId)));
+                        String.format("No se encontró la cita con ID '%s'.", appointmentId)));
 
         // 2. Uso de 409 Conflict si el estado actual de la cita no permite cancelarla
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
-            throw new ResourceConflictException("The appointment is already canceled.");
+            throw new ResourceConflictException("La cita ya está cancelada.");
         }
         if (appointment.getStatus() == AppointmentStatus.ATTENDED) {
-            throw new ResourceConflictException("Cannot cancel an appointment that has already been completed.");
+            throw new ResourceConflictException("No se puede cancelar una cita que ya ha sido completada.");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -41,7 +41,7 @@ public class CancelAppointmentHandler implements CancelAppointmentUseCase {
             appointmentOutputPort.registerPenalty(
                 appointmentId,
                 appointment.getPatientId(), 
-                "Late cancellation (Less than 2 hours before the scheduled time)"
+                "Cancelación tardía (Menos de 2 horas antes de la hora programada)"
             );
         }
 

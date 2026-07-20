@@ -77,7 +77,7 @@ class CreateAppointmentHandlerTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, 
                 () -> createAppointmentHandler.execute(command));
 
-        assertEquals(String.format("Patient with ID '%s' does not exist.", patientId), exception.getMessage());
+        assertEquals(String.format("El paciente con ID '%s' no existe.", patientId), exception.getMessage());
         
         // Verificaciones de seguridad: no debe avanzar el flujo a validar el médico ni a guardar
         verify(appointmentOutputPort, never()).doctorExists(any());
@@ -95,7 +95,7 @@ class CreateAppointmentHandlerTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, 
                 () -> createAppointmentHandler.execute(command));
 
-        assertEquals(String.format("Doctor with ID '%s' does not exist.", doctorId), exception.getMessage());
+        assertEquals(String.format("El doctor con ID '%s' no existe.", doctorId), exception.getMessage());
         
         // Verificaciones de seguridad: se frena antes de contar penalizaciones o persistir
         verify(appointmentOutputPort, never()).countPenaltiesInLast30Days(any(), any());
@@ -116,7 +116,7 @@ class CreateAppointmentHandlerTest {
                 () -> createAppointmentHandler.execute(command));
 
         String expectedMessage = String.format(
-            "The patient is temporarily suspended from scheduling new appointments. Reason: accumulates %d penalties in the last 30 days.", 
+            "El paciente está suspendido temporalmente para programar nuevas citas. Razón: acumula %d penalizaciones en los últimos 30 días.", 
             highPenaltyCount
         );
         assertEquals(expectedMessage, exception.getMessage());

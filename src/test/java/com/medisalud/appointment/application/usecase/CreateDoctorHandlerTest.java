@@ -77,7 +77,7 @@ class CreateDoctorHandlerTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class,
                 () -> createDoctorHandler.execute(command));
 
-        assertEquals(String.format("A doctor with email '%s' already exists.", doctorEmail), exception.getMessage());
+        assertEquals(String.format("Ya existe un doctor con el correo electrónico '%s'.", doctorEmail), exception.getMessage());
 
         // Cortocircuito: Al lanzar la excepción por conflicto, jamás debe mapear ni persistir en DB
         verify(doctorOutputPort, never()).save(any(Doctor.class));

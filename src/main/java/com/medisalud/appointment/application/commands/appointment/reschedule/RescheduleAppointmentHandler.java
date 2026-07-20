@@ -29,11 +29,11 @@ public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCas
         // 1. Uso de 404 Not Found si la cita original no existe
         Appointment oldAppointment = appointmentOutputPort.findById(command.appointmentId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Appointment with ID '%s' not found.", command.appointmentId())));
+                        String.format("No se encontró la cita con ID '%s'.", command.appointmentId())));
 
         // 2. Uso de 409 Conflict por solapamiento de horarios del médico
         if (appointmentOutputPort.isDoctorOccupiedAt(oldAppointment.getDoctorId(), command.newScheduledAt())) {
-            throw new ResourceConflictException("The doctor is not available at the requested new time slot.");
+            throw new ResourceConflictException("El doctor no está disponible en el nuevo horario solicitado.");
         }
         
         cancelHandler.execute(command.appointmentId());

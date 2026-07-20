@@ -9,7 +9,7 @@ public class ValidationAppException extends DomainException {
     private final List<String> errors;
 
     public ValidationAppException(List<String> errors) {
-        super("Validation failed", 400); 
+        super("La validación falló", 400); 
         this.errors = errors != null ? errors : List.of();
     }
 }

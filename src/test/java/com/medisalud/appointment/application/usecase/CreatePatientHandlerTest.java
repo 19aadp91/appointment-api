@@ -77,7 +77,7 @@ class CreatePatientHandlerTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class,
                 () -> createPatientHandler.execute(command));
 
-        assertEquals(String.format("A patient with document number '%s' already exists.", documentNumber), exception.getMessage());
+        assertEquals(String.format("Ya existe un paciente con el número de documento '%s'.", documentNumber), exception.getMessage());
 
         // Cortocircuito del primer 'if': No debe verificar el email ni intentar guardar
         verify(patientOutputPort, never()).existsByEmail(any());
@@ -95,7 +95,7 @@ class CreatePatientHandlerTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class,
                 () -> createPatientHandler.execute(command));
 
-        assertEquals(String.format("A patient with email '%s' already exists.", patientEmail), exception.getMessage());
+        assertEquals(String.format("Ya existe un paciente con el correo electrónico '%s'.", patientEmail), exception.getMessage());
 
         // Cortocircuito del segundo 'if': Verificó documento y email, pero jamás debe invocar al guardado
         verify(patientOutputPort, times(1)).existsByDocumentNumber(documentNumber);

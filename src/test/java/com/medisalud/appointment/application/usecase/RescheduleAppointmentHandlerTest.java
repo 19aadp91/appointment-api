@@ -99,7 +99,7 @@ class RescheduleAppointmentHandlerTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, 
                 () -> rescheduleAppointmentHandler.execute(command));
 
-        assertEquals(String.format("Appointment with ID '%s' not found.", appointmentId), exception.getMessage());
+        assertEquals(String.format("No se encontró la cita con ID '%s'.", appointmentId), exception.getMessage());
         
         verify(appointmentOutputPort, never()).isDoctorOccupiedAt(any(), any());
         verify(appointmentOutputPort, never()).cancelAppointment(any(), any());
@@ -120,7 +120,7 @@ class RescheduleAppointmentHandlerTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class, 
                 () -> rescheduleAppointmentHandler.execute(command));
 
-        assertEquals("The doctor is not available at the requested new time slot.", exception.getMessage());
+        assertEquals("El doctor no está disponible en el nuevo horario solicitado.", exception.getMessage());
         
         verify(appointmentOutputPort, never()).cancelAppointment(any(), any());
         verify(appointmentOutputPort, never()).save(any());
@@ -142,7 +142,7 @@ class RescheduleAppointmentHandlerTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class, 
                 () -> rescheduleAppointmentHandler.execute(command));
 
-        assertEquals("Cannot cancel an appointment that has already been completed.", exception.getMessage());
+        assertEquals("No se puede cancelar una cita que ya ha sido completada.", exception.getMessage());
         
         verify(appointmentOutputPort, never()).save(any());
     }

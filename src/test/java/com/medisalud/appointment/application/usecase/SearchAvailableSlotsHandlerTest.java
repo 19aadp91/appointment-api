@@ -84,7 +84,7 @@ class SearchAvailableSlotsHandlerTest {
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> searchAvailableSlotsHandler.execute(doctorId, startDate, endDate));
 
-        assertEquals("The start date cannot be after the end date.", exception.getMessage());
+        assertEquals("La fecha de inicio no puede ser posterior a la fecha de fin.", exception.getMessage());
 
         // Cortocircuito: No debe validar existencia ni buscar en DB
         verify(appointmentOutputPort, never()).doctorExists(any());
@@ -104,7 +104,7 @@ class SearchAvailableSlotsHandlerTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> searchAvailableSlotsHandler.execute(doctorId, startDate, endDate));
 
-        assertEquals(String.format("Doctor with ID '%s' does not exist.", doctorId), exception.getMessage());
+        assertEquals(String.format("El doctor con ID '%s' no existe.", doctorId), exception.getMessage());
 
         // Cortocircuito: Se detiene inmediatamente y nunca consulta la agenda en DB
         verify(appointmentOutputPort, never()).findBookedTimesByDoctorAndRange(any(), any(), any());
@@ -121,11 +121,10 @@ class SearchAvailableSlotsHandlerTest {
         when(appointmentOutputPort.findBookedTimesByDoctorAndRange(eq(doctorId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
 
-        // Act
-        List<LocalDateTime> availableSlots = searchAvailableSlotsHandler.execute(doctorId, sunday, sunday);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> searchAvailableSlotsHandler.execute(doctorId, sunday, sunday));
 
-        // Assert
-        // Al ser domingo, el bucle hace continue y la lista debe retornar vacía
-        assertTrue(availableSlots.isEmpty());
+        assertEquals("El doctor no está disponible en el rango de fechas especificado.", exception.getMessage());
     }
 }

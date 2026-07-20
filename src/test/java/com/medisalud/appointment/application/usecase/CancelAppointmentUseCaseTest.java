@@ -74,7 +74,7 @@ class CancelAppointmentUseCaseTest {
         verify(appointmentOutputPort, times(1)).registerPenalty(
                 eq(appointmentId),
                 eq(patientId),
-                contains("Late cancellation")
+                contains("Cancelación tardía")
         );
         verify(appointmentOutputPort, times(1)).cancelAppointment(eq(appointmentId), any(LocalDateTime.class));
     }
@@ -90,7 +90,7 @@ class CancelAppointmentUseCaseTest {
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, 
                 () -> cancelAppointmentUseCase.execute(appointmentId));
 
-        assertEquals(String.format("Appointment with ID '%s' not found.", appointmentId), exception.getMessage());
+        assertEquals(String.format("No se encontró la cita con ID '%s'.", appointmentId), exception.getMessage());
         verify(appointmentOutputPort, never()).cancelAppointment(any(), any());
     }
 
@@ -108,7 +108,7 @@ class CancelAppointmentUseCaseTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class, 
                 () -> cancelAppointmentUseCase.execute(appointmentId));
 
-        assertEquals("The appointment is already canceled.", exception.getMessage());
+        assertEquals("La cita ya está cancelada.", exception.getMessage());
         verify(appointmentOutputPort, never()).cancelAppointment(any(), any());
     }
 
@@ -126,7 +126,7 @@ class CancelAppointmentUseCaseTest {
         ResourceConflictException exception = assertThrows(ResourceConflictException.class, 
                 () -> cancelAppointmentUseCase.execute(appointmentId));
 
-        assertEquals("Cannot cancel an appointment that has already been completed.", exception.getMessage());
+        assertEquals("No se puede cancelar una cita que ya ha sido completada.", exception.getMessage());
         verify(appointmentOutputPort, never()).cancelAppointment(any(), any());
     }
 }

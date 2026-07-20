@@ -7,11 +7,11 @@ public record DomainErrorRecord(String code, String message) {
         private Validation() {}
 
         public static DomainErrorRecord requiredField(String field) {
-            return new DomainErrorRecord("Validation.Required", String.format("The field '%s' is required.", field));
+            return new DomainErrorRecord("Validation.Required", String.format("El campo '%s' es obligatorio.", field));
         }
 
         public static DomainErrorRecord invalidFormat(String field) {
-            return new DomainErrorRecord("Validation.InvalidFormat", String.format("The format of the field '%s' is invalid.", field));
+            return new DomainErrorRecord("Validation.InvalidFormat", String.format("El formato del campo '%s' no es válido.", field));
         }
     }
 
@@ -20,7 +20,7 @@ public record DomainErrorRecord(String code, String message) {
         private System() {}
 
         public static DomainErrorRecord internalError() {
-            return new DomainErrorRecord("System.InternalError", "An internal server error occurred. Please try again later.");
+            return new DomainErrorRecord("System.InternalError", "Ocurrió un error interno del servidor. Por favor, inténtelo de nuevo más tarde.");
         }
     }
 }

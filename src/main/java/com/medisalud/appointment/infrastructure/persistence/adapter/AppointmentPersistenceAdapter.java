@@ -60,7 +60,7 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
             AppointmentEntity saved = repository.save(entity);
             return AppointmentMapperInfra.toDomain(saved);
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error saving appointment:" + ex.getMessage());
+            throw new PersistenceException("Error al guardar la cita: " + ex.getMessage());
         }
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);
@@ -88,7 +88,7 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
             penaltyRepository.save(penalty);
         } catch (DataAccessException ex) {
             ex.printStackTrace(); 
-            throw new PersistenceException("Failed to register penalty due to entity state issue: " + ex.getMessage());
+            throw new PersistenceException("Error al registrar la penalización debido a un problema de estado de la entidad: " + ex.getMessage());
         }
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);
@@ -109,14 +109,14 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
     public void cancelAppointment(UUID appointmentId, LocalDateTime cancellationTime) {
         try {
             AppointmentEntity entity = repository.findById(appointmentId)
-                    .orElseThrow(() -> new PersistenceException("Appointment entity not found for cancellation."));
+                    .orElseThrow(() -> new PersistenceException("No se encontró la entidad de la cita para la cancelación."));
 
             entity.setStatus(AppointmentStatus.CANCELLED);
             entity.setCancellationDatetime(cancellationTime);
 
             repository.save(entity);
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error updating appointment cancellation status.: " + ex.getMessage());
+            throw new PersistenceException("Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
         }
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);
@@ -148,7 +148,7 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
                     .map(AppointmentMapperInfra::toDomain)
                     .toList();
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error updating appointment cancellation status.: " + ex.getMessage());
+            throw new PersistenceException("Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
         }
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);

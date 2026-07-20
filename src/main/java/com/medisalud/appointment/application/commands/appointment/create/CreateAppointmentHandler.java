@@ -24,13 +24,13 @@ public class CreateAppointmentHandler implements CreateAppointmentUseCase {
         // 1. Uso de 404 Not Found si el paciente no existe
         if (!appointmentOutputPort.patientExists(command.patientId())) {
             throw new ResourceNotFoundException(
-                String.format("Patient with ID '%s' does not exist.", command.patientId()));
+                String.format("El paciente con ID '%s' no existe.", command.patientId()));
         }
 
         // 2. Uso de 404 Not Found si el médico no existe
         if (!appointmentOutputPort.doctorExists(command.doctorId())) {
             throw new ResourceNotFoundException(
-                String.format("Doctor with ID '%s' does not exist.", command.doctorId()));
+                String.format("El doctor con ID '%s' no existe.", command.doctorId()));
         }
 
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
@@ -39,7 +39,7 @@ public class CreateAppointmentHandler implements CreateAppointmentUseCase {
         // 3. Uso de 400 Conflict si el paciente está suspendido por negocio
         if (penaltyCount >= 3) {
             throw new BusinessException(String.format(
-                "The patient is temporarily suspended from scheduling new appointments. Reason: accumulates %d penalties in the last 30 days.", 
+                "El paciente está suspendido temporalmente para programar nuevas citas. Razón: acumula %d penalizaciones en los últimos 30 días.", 
                 penaltyCount
             ));
         }

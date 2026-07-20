@@ -31,12 +31,12 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
         // 1. Mantenemos BusinessException (400) por error de lógica en el rango de
         // fechas
         if (startDate.isAfter(endDate)) {
-            throw new BusinessException("The start date cannot be after the end date.");
+            throw new BusinessException("La fecha de inicio no puede ser posterior a la fecha de fin.");
         }
 
         // 2. Cambiamos a ResourceNotFoundException (404) si el médico no existe
         if (!appointmentOutputPort.doctorExists(doctorId)) {
-            throw new ResourceNotFoundException(String.format("Doctor with ID '%s' does not exist.", doctorId));
+            throw new ResourceNotFoundException(String.format("El doctor con ID '%s' no existe.", doctorId));
         }
 
         LocalDateTime dbStart = startDate.atTime(START_WORK_HOUR);
@@ -71,7 +71,7 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
         }
 
         if (availableSlots.isEmpty()) {
-            throw new ResourceNotFoundException("Doctor is not available in the specified date range.");
+            throw new ResourceNotFoundException("El doctor no está disponible en el rango de fechas especificado.");
         }
 
         return availableSlots;

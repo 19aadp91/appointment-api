@@ -41,7 +41,7 @@ public class PatientPersistenceAdapter implements PatientOutputPort {
             PatientEntity saved = repository.save(entity);
             return PatientMapperInfra.toDomain(saved);
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error saving patient to database."+ ex.getMessage());
+            throw new PersistenceException("Error al guardar el paciente en la base de datos: " + ex.getMessage());
         }
         catch (Exception e) {
             throw new InfrastructureException(e.getMessage(),500);

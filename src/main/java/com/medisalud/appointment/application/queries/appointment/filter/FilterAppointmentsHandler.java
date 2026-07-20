@@ -22,13 +22,13 @@ public class FilterAppointmentsHandler implements FilterAppointmentsUseCase {
     public List<Appointment> execute(UUID doctorId, UUID patientId, String status, LocalDate startDate, LocalDate endDate) {
         
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw new BusinessException("The start date cannot be after the end date.");
+            throw new BusinessException("La fecha de inicio no puede ser posterior a la fecha de fin.");
         }
 
         List<Appointment> appointments = appointmentOutputPort.findAppointmentsByFilters(doctorId, patientId, status, startDate, endDate);
 
         if (appointments.isEmpty()) {
-            throw new ResourceNotFoundException("No appointments found for the given filters.");
+            throw new ResourceNotFoundException("No se encontraron citas para los filtros proporcionados.");
         } 
         
         return appointments;

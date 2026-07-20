@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record RescheduleAppointmentCommand(
-    @NotNull(message = "Appointment ID is required.")
+    @NotNull(message = "El ID de la cita es obligatorio.")
     UUID appointmentId,
 
-    @NotNull(message = "New date and time are required.")
-    @Future(message = "The new appointment date must be in the future.")
+    @NotNull(message = "La nueva fecha y hora son obligatorias.")
+    @Future(message = "La nueva fecha de la cita debe ser en el futuro.")
     LocalDateTime newScheduledAt
 ) {}

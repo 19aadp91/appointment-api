@@ -22,7 +22,7 @@ public class CreateDoctorHandler implements CreateDoctorUseCase {
         // Usamos 409 Conflict porque el email ya está registrado y choca con la restricción de unicidad
         if (doctorOutputPort.existsByEmail(command.email())) {
             throw new ResourceConflictException(
-                String.format("A doctor with email '%s' already exists.", command.email()));
+                String.format("Ya existe un doctor con el correo electrónico '%s'.", command.email()));
         }
 
         Doctor doctor = DoctorMapperAplication.toDomain(command);
