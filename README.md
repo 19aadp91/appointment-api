@@ -94,27 +94,44 @@ Procesos complejos como la reprogramación de una cita se ejecutan de forma ató
 # Estructura del proyecto
 
 ```
-src
-├── domain
-│   ├── model
-│   ├── ports
-│   ├── handlers
-│   └── exceptions
-│
-├── application
-│   ├── usecases
-│   ├── commands
-│   └── queries
-│
-├── infrastructure
-│   ├── adapters
-│   │   ├── input
-│   │   └── output
-│   ├── persistence
-│   ├── controllers
-│   └── configuration
-│
-└── MedisaludApplication.java
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/medisalud/appointment/
+│   │   │       ├── application/
+│   │   │       │   └── ports/
+│   │   │       │       ├── input/
+│   │   │       │       └── output/
+│   │   │       │           ├── commands/
+│   │   │       │           │   └── doctor/
+│   │   │       │           │       └── create/
+│   │   │       │           └── queries/
+│   │   │       │               └── doctor/
+│   │   │       │                   ├── get/
+│   │   │       │                   └── getById/
+│   │   │       ├── domain/
+│   │   │       │   ├── enums/
+│   │   │       │   ├── errorMessage/
+│   │   │       │   ├── exceptions/
+│   │   │       │   ├── model/
+│   │   │       │   └── wrapper/
+│   │   │       ├── infrastructure/
+│   │   │       │   ├── exceptions/
+│   │   │       │   ├── global/
+│   │   │       │   ├── persistence/
+│   │   │       │   │   ├── adapter/
+│   │   │       │   │   ├── entity/
+│   │   │       │   │   └── repository/
+│   │   │       │   └── rest/
+│   │   │       └── AppointmentApiApplication.java
+│   │   └── resources/
+│   │       ├── db/
+│   │       │   └── migration/
+│   │       ├── static/
+│   │       └── templates/
+│   └── test/
+│       └── java/
+│           └── com/medisalud/appointment/
 ```
 
 ---
