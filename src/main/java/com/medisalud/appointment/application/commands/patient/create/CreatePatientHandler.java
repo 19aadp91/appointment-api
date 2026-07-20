@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.medisalud.appointment.application.Mapper.patient.PatientMapperAplication;
 import com.medisalud.appointment.application.ports.input.patient.CreatePatientUseCase;
 import com.medisalud.appointment.application.ports.output.patient.PatientOutputPort;
-import com.medisalud.appointment.domain.exceptions.BusinessException;
+import com.medisalud.appointment.domain.exceptions.ResourceConflictException;
 import com.medisalud.appointment.domain.model.Patient;
 
 public class CreatePatientHandler implements CreatePatientUseCase {
@@ -18,12 +18,16 @@ public class CreatePatientHandler implements CreatePatientUseCase {
 
     @Override
     public UUID execute(CreatePatientCommand command) {
+        // 1. Uso de 409 Conflict por duplicación de documento de identidad
         if (patientOutputPort.existsByDocumentNumber(command.documentNumber())) {
-            throw new BusinessException(String.format("A patient with document number '%s' already exists.", command.documentNumber()));
+            throw new ResourceConflictException(
+                String.format("A patient with document number '%s' already exists.", command.documentNumber()));
         }
 
+        // 2. Uso de 409 Conflict por duplicación de correo electrónico
         if (patientOutputPort.existsByEmail(command.email())) {
-            throw new BusinessException(String.format("A patient with email '%s' already exists.", command.email()));
+            throw new ResourceConflictException(
+                String.format("A patient with email '%s' already exists.", command.email()));
         }
 
         Patient patient = PatientMapperAplication.toDomain(command);

@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.medisalud.appointment.application.Mapper.Doctor.DoctorMapperAplication;
 import com.medisalud.appointment.application.ports.input.doctor.CreateDoctorUseCase;
 import com.medisalud.appointment.application.ports.output.doctor.DoctorOutputPort;
-import com.medisalud.appointment.domain.exceptions.BusinessException;
+import com.medisalud.appointment.domain.exceptions.ResourceConflictException;
 import com.medisalud.appointment.domain.model.Doctor;
 
 public class CreateDoctorHandler implements CreateDoctorUseCase {
@@ -19,8 +19,10 @@ public class CreateDoctorHandler implements CreateDoctorUseCase {
     @Override
     public UUID execute(CreateDoctorCommand command) {
         
+        // Usamos 409 Conflict porque el email ya está registrado y choca con la restricción de unicidad
         if (doctorOutputPort.existsByEmail(command.email())) {
-            throw new BusinessException(String.format("A doctor with email '%s' already exists.", command.email()));
+            throw new ResourceConflictException(
+                String.format("A doctor with email '%s' already exists.", command.email()));
         }
 
         Doctor doctor = DoctorMapperAplication.toDomain(command);

@@ -3,6 +3,7 @@ package com.medisalud.appointment.application.commands.appointment.search;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
 import com.medisalud.appointment.domain.exceptions.BusinessException;
+import com.medisalud.appointment.domain.exceptions.ResourceNotFoundException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -27,11 +28,14 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
 
     @Override
     public List<LocalDateTime> execute(UUID doctorId, LocalDate startDate, LocalDate endDate) {
+        // 1. Mantenemos BusinessException (400) por error de lógica en el rango de fechas
         if (startDate.isAfter(endDate)) {
             throw new BusinessException("The start date cannot be after the end date.");
         }
+        
+        // 2. Cambiamos a ResourceNotFoundException (404) si el médico no existe
         if (!appointmentOutputPort.doctorExists(doctorId)) {
-            throw new BusinessException(String.format("Doctor with ID '%s' does not exist.", doctorId));
+            throw new ResourceNotFoundException(String.format("Doctor with ID '%s' does not exist.", doctorId));
         }
 
         LocalDateTime dbStart = startDate.atTime(START_WORK_HOUR);
@@ -44,7 +48,7 @@ public class SearchAvailableSlotsHandler implements SearchAvailableSlotsUseCase 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             DayOfWeek dayOfWeek = date.getDayOfWeek();
             
-            // 🚨 Ignorar domingos si no se trabaja
+            // Ignorar domingos si no se trabaja
             if (dayOfWeek == DayOfWeek.SUNDAY) {
                 continue;
             }

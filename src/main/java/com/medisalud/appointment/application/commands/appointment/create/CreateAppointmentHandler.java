@@ -7,6 +7,7 @@ import com.medisalud.appointment.application.Mapper.appointment.AppointmentMappe
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
 import com.medisalud.appointment.domain.exceptions.BusinessException;
+import com.medisalud.appointment.domain.exceptions.ResourceNotFoundException;
 import com.medisalud.appointment.domain.model.Appointment;
 
 public class CreateAppointmentHandler implements CreateAppointmentUseCase {
@@ -20,17 +21,22 @@ public class CreateAppointmentHandler implements CreateAppointmentUseCase {
     @Override
     public UUID execute(CreateAppointmentCommand command) {
         
+        // 1. Uso de 404 Not Found si el paciente no existe
         if (!appointmentOutputPort.patientExists(command.patientId())) {
-            throw new BusinessException(String.format("Patient with ID '%s' does not exist.", command.patientId()));
+            throw new ResourceNotFoundException(
+                String.format("Patient with ID '%s' does not exist.", command.patientId()));
         }
 
+        // 2. Uso de 404 Not Found si el médico no existe
         if (!appointmentOutputPort.doctorExists(command.doctorId())) {
-            throw new BusinessException(String.format("Doctor with ID '%s' does not exist.", command.doctorId()));
+            throw new ResourceNotFoundException(
+                String.format("Doctor with ID '%s' does not exist.", command.doctorId()));
         }
 
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
         long penaltyCount = appointmentOutputPort.countPenaltiesInLast30Days(command.patientId(), thirtyDaysAgo);
 
+        // 3. Uso de 400 Conflict si el paciente está suspendido por negocio
         if (penaltyCount >= 3) {
             throw new BusinessException(String.format(
                 "The patient is temporarily suspended from scheduling new appointments. Reason: accumulates %d penalties in the last 30 days.", 
