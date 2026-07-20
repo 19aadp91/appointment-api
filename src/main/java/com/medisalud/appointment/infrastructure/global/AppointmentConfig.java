@@ -6,9 +6,12 @@ import com.medisalud.appointment.application.commands.appointment.reschedule.Res
 import com.medisalud.appointment.application.commands.appointment.search.SearchAvailableSlotsHandler;
 import com.medisalud.appointment.application.ports.input.appointment.CancelAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
+import com.medisalud.appointment.application.ports.input.appointment.FilterAppointmentsUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.RescheduleAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
+import com.medisalud.appointment.application.queries.appointment.filter.FilterAppointmentsHandler;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,5 +40,10 @@ public class AppointmentConfig {
     @Transactional
     public RescheduleAppointmentUseCase rescheduleAppointmentUseCase(AppointmentOutputPort appointmentOutputPort) {
         return new RescheduleAppointmentHandler(appointmentOutputPort);
+    }
+
+    @Bean
+    public FilterAppointmentsUseCase filterAppointmentsUseCase(AppointmentOutputPort appointmentOutputPort) {
+        return new FilterAppointmentsHandler(appointmentOutputPort);
     }
 }

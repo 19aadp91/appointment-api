@@ -1,19 +1,23 @@
 package com.medisalud.appointment.infrastructure.global;
 
+
+import lombok.extern.slf4j.Slf4j; // Para usar el objeto 'log' directamente
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import com.medisalud.appointment.domain.exceptions.DomainException;
 import com.medisalud.appointment.domain.exceptions.ValidationAppException;
 import com.medisalud.appointment.domain.wrapper.ApiResponse;
 import com.medisalud.appointment.infrastructure.exceptions.InfrastructureException;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@Slf4j // <-- Esto genera automáticamente la variable 'log' lista para usar
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -27,10 +31,12 @@ public class GlobalExceptionHandler {
 
         ValidationAppException validationException = new ValidationAppException(errors);
 
+        log.warn("Validation error standardizing request fields: {}", errors);
+
         ApiResponse<Void> response = ApiResponse.failed(validationException.getMessage(), validationException.getErrors());
         
         return ResponseEntity
-                .status(validationException.getStatusCode()) // Devuelve 400 Bad Request
+                .status(validationException.getStatusCode()) 
                 .body(response);
     }
 
@@ -40,6 +46,9 @@ public class GlobalExceptionHandler {
         if (ex instanceof ValidationAppException validationEx) {
             errorList = validationEx.getErrors();
         }
+
+        log.warn("Domain exception caught [Code: {}]: {} - Reasons: {}", ex.getStatusCode(), ex.getMessage(), errorList);
+
         ApiResponse<Void> response = ApiResponse.failed(ex.getMessage(), errorList);
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
@@ -51,6 +60,8 @@ public class GlobalExceptionHandler {
             String.format("Error details: %s", ex.getMessage())
         );
 
+        log.error("Infrastructure exception caught [Status: {}]: {}", ex.getHttpStatus(), ex.getMessage());
+
         ApiResponse<Void> response = ApiResponse.failed(clientMessage, technicalDetails);
         
         return ResponseEntity.status(ex.getHttpStatus()).body(response);
@@ -58,6 +69,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
+        
+        log.error("Critical internal server error unhandled by the application:", ex);
+
         ApiResponse<Void> response = ApiResponse.failed(
             "A critical internal server error occurred.", 
             List.of("Unexpected system failure.")

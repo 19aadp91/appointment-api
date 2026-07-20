@@ -28,4 +28,17 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
        LocalDateTime dateTime, 
        com.medisalud.appointment.domain.enums.AppointmentStatus status
        );
+
+       @Query("SELECT a FROM AppointmentEntity a WHERE " +
+           "(:doctorId IS NULL OR a.doctor.doctorId = :doctorId) AND " +
+           "(:patientId IS NULL OR a.patient.patientId = :patientId) AND " +
+           "(:status IS NULL OR a.status = :status) AND " +
+           "(CAST(:startDateTime AS timestamp) IS NULL OR a.appointmentDatetime >= :startDateTime) AND " +
+           "(CAST(:endDateTime AS timestamp) IS NULL OR a.appointmentDatetime <= :endDateTime)")
+    List<AppointmentEntity> findByOptionalFilters(
+            @Param("doctorId") UUID doctorId,
+            @Param("patientId") UUID patientId,
+            @Param("status") AppointmentStatus status,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
 }

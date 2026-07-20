@@ -2,6 +2,7 @@ package com.medisalud.appointment.infrastructure.persistence.adapter;
 
 
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
+import com.medisalud.appointment.domain.enums.AppointmentStatus;
 import com.medisalud.appointment.domain.model.Appointment;
 import com.medisalud.appointment.infrastructure.Mapper.AppointmentMapperInfra;
 import com.medisalud.appointment.infrastructure.exceptions.InfrastructureException;
@@ -17,6 +18,7 @@ import com.medisalud.appointment.infrastructure.persistence.repository.SpringDat
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -109,7 +111,7 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
             AppointmentEntity entity = repository.findById(appointmentId)
                     .orElseThrow(() -> new PersistenceException("Appointment entity not found for cancellation."));
 
-            entity.setStatus(com.medisalud.appointment.domain.enums.AppointmentStatus.CANCELLED);
+            entity.setStatus(AppointmentStatus.CANCELLED);
             entity.setCancellationDatetime(cancellationTime);
 
             repository.save(entity);
@@ -126,7 +128,30 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
         return repository.existsByDoctorDoctorIdAndAppointmentDatetimeAndStatus(
             doctorId, 
             dateTime, 
-            com.medisalud.appointment.domain.enums.AppointmentStatus.PROGRAMMED
+            AppointmentStatus.PROGRAMMED
         );
+    }
+
+    @Override
+    public List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status, LocalDate startDate, LocalDate endDate) {
+        try {
+            LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+            LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(23, 59, 59) : null;
+
+            AppointmentStatus appointmentStatus = null;
+            if (status != null && !status.isBlank()) {
+                appointmentStatus = AppointmentStatus.valueOf(status.toUpperCase().trim());
+            }
+
+            return repository.findByOptionalFilters(doctorId, patientId, appointmentStatus, startDateTime, endDateTime)
+                    .stream()
+                    .map(AppointmentMapperInfra::toDomain)
+                    .toList();
+        } catch (DataAccessException ex) {
+            throw new PersistenceException("Error updating appointment cancellation status.: " + ex.getMessage());
+        }
+        catch (Exception e) {
+            throw new InfrastructureException(e.getMessage(),500);
+        }     
     }
 }

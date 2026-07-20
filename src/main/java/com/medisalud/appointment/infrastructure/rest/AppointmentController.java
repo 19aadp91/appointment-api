@@ -4,11 +4,15 @@ import com.medisalud.appointment.application.commands.appointment.create.CreateA
 import com.medisalud.appointment.application.commands.appointment.reschedule.RescheduleAppointmentCommand;
 import com.medisalud.appointment.application.ports.input.appointment.CancelAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.CreateAppointmentUseCase;
+import com.medisalud.appointment.application.ports.input.appointment.FilterAppointmentsUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.RescheduleAppointmentUseCase;
 import com.medisalud.appointment.application.ports.input.appointment.SearchAvailableSlotsUseCase;
+import com.medisalud.appointment.domain.model.Appointment;
 import com.medisalud.appointment.domain.wrapper.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +31,7 @@ public class AppointmentController {
     private final SearchAvailableSlotsUseCase searchAvailableSlotsUseCase;
     private final CancelAppointmentUseCase cancelAppointmentUseCase;
     private final RescheduleAppointmentUseCase rescheduleAppointmentUseCase;
+    private final FilterAppointmentsUseCase filterAppointmentsUseCase;
 
     @PostMapping
     public ResponseEntity<ApiResponse<UUID>> createAppointment(@Valid @RequestBody CreateAppointmentCommand command) {
@@ -55,5 +60,18 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<UUID>> rescheduleAppointment(@Valid @RequestBody RescheduleAppointmentCommand command) {
         UUID newAppointmentId = rescheduleAppointmentUseCase.execute(command);
         return ResponseEntity.ok(ApiResponse.success(newAppointmentId,"Appointment rescheduled successfully."));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<Appointment>>> getAppointments(
+            @RequestParam(required = false) UUID doctorId,
+            @RequestParam(required = false) UUID patientId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            
+        List<Appointment> appointments = filterAppointmentsUseCase.execute(doctorId, patientId, status, startDate, endDate);
+        
+        return ResponseEntity.ok(ApiResponse.success(appointments, "Appointments filtered successfully."));
     }
 }

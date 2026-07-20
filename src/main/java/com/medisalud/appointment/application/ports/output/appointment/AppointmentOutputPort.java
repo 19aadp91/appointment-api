@@ -1,5 +1,6 @@
 package com.medisalud.appointment.application.ports.output.appointment;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +19,5 @@ public interface AppointmentOutputPort {
     void registerPenalty(UUID appointmentId, UUID patientId, String reason);
     long countPenaltiesInLast30Days(UUID patientId, java.time.LocalDateTime since);
     boolean isDoctorOccupiedAt(UUID doctorId, java.time.LocalDateTime dateTime);
+    List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status, LocalDate startDate, LocalDate endDate);
 }
