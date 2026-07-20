@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ApiResponse<Void>> handleDomainException(DomainException ex) {
-        List<String> errorList = List.of("Business rule violation.");
+        List<String> errorList = List.of("");
         if (ex instanceof ValidationAppException validationEx) {
             errorList = validationEx.getErrors();
         }
