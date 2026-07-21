@@ -7,17 +7,31 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.medisalud.appointment.domain.model.Appointment;
+import com.medisalud.appointment.domain.model.Patient;
 
 public interface AppointmentOutputPort {
     Appointment save(Appointment appointment);
+
     boolean patientExists(UUID patientId);
+
     boolean doctorExists(UUID doctorId);
+
     List<LocalDateTime> findBookedTimesByDoctorAndRange(UUID doctorId, LocalDateTime start, LocalDateTime end);
 
     Optional<Appointment> findById(UUID appointmentId);
+
     void cancelAppointment(UUID appointmentId, java.time.LocalDateTime cancellationTime);
+
     void registerPenalty(UUID appointmentId, UUID patientId, String reason);
+
     long countPenaltiesInLast30Days(UUID patientId, java.time.LocalDateTime since);
+
     boolean isDoctorOccupiedAt(UUID doctorId, java.time.LocalDateTime dateTime);
-    List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status, LocalDate startDate, LocalDate endDate);
+
+    List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status, LocalDate startDate,
+            LocalDate endDate);
+
+    Optional<Patient> findPatientById(UUID patientId);
+
+    boolean isPatientOccupiedAt(UUID patientId, LocalDateTime dateTime);
 }

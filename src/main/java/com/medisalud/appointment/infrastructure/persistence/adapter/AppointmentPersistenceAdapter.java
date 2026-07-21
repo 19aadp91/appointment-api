@@ -1,10 +1,11 @@
 package com.medisalud.appointment.infrastructure.persistence.adapter;
 
-
 import com.medisalud.appointment.application.ports.output.appointment.AppointmentOutputPort;
 import com.medisalud.appointment.domain.enums.AppointmentStatus;
 import com.medisalud.appointment.domain.model.Appointment;
+import com.medisalud.appointment.domain.model.Patient;
 import com.medisalud.appointment.infrastructure.Mapper.AppointmentMapperInfra;
+import com.medisalud.appointment.infrastructure.Mapper.PatientMapperInfra;
 import com.medisalud.appointment.infrastructure.exceptions.InfrastructureException;
 import com.medisalud.appointment.infrastructure.exceptions.PersistenceException;
 import com.medisalud.appointment.infrastructure.persistence.entity.AppointmentEntity;
@@ -33,10 +34,10 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
     private final SpringDataPenaltyRepository penaltyRepository;
 
     public AppointmentPersistenceAdapter(
-        SpringDataAppointmentRepository repository, 
-        SpringDataPatientRepository patientRepository, 
-        SpringDataDoctorRepository doctorRepository,
-        SpringDataPenaltyRepository penaltyRepository) {
+            SpringDataAppointmentRepository repository,
+            SpringDataPatientRepository patientRepository,
+            SpringDataDoctorRepository doctorRepository,
+            SpringDataPenaltyRepository penaltyRepository) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
@@ -61,37 +62,38 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
             return AppointmentMapperInfra.toDomain(saved);
         } catch (DataAccessException ex) {
             throw new PersistenceException("Error al guardar la cita: " + ex.getMessage());
-        }
-        catch (Exception e) {
-            throw new InfrastructureException(e.getMessage(),500);
+        } catch (Exception e) {
+            throw new InfrastructureException(e.getMessage(), 500);
         }
     }
 
     @Override
     public List<LocalDateTime> findBookedTimesByDoctorAndRange(UUID doctorId, LocalDateTime start, LocalDateTime end) {
-        return repository.findBookedDatetimes(doctorId, start, end, com.medisalud.appointment.domain.enums.AppointmentStatus.PROGRAMMED);
+        return repository.findBookedDatetimes(doctorId, start, end,
+                com.medisalud.appointment.domain.enums.AppointmentStatus.PROGRAMMED);
     }
 
     @Override
     public void registerPenalty(UUID appointmentId, UUID patientId, String reason) {
         try {
             PenaltyEntity penalty = new PenaltyEntity();
-            
+
             PatientEntity patientRef = patientRepository.getReferenceById(patientId);
             AppointmentEntity appointmentRef = repository.getReferenceById(appointmentId);
-            
+
             penalty.setPatient(patientRef);
             penalty.setAppointment(appointmentRef);
             penalty.setReason(reason);
             penalty.setCreatedAt(LocalDateTime.now());
-            
+
             penaltyRepository.save(penalty);
         } catch (DataAccessException ex) {
-            ex.printStackTrace(); 
-            throw new PersistenceException("Error al registrar la penalización debido a un problema de estado de la entidad: " + ex.getMessage());
-        }
-        catch (Exception e) {
-            throw new InfrastructureException(e.getMessage(),500);
+            ex.printStackTrace();
+            throw new PersistenceException(
+                    "Error al registrar la penalización debido a un problema de estado de la entidad: "
+                            + ex.getMessage());
+        } catch (Exception e) {
+            throw new InfrastructureException(e.getMessage(), 500);
         }
     }
 
@@ -109,31 +111,32 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
     public void cancelAppointment(UUID appointmentId, LocalDateTime cancellationTime) {
         try {
             AppointmentEntity entity = repository.findById(appointmentId)
-                    .orElseThrow(() -> new PersistenceException("No se encontró la entidad de la cita para la cancelación."));
+                    .orElseThrow(() -> new PersistenceException(
+                            "No se encontró la entidad de la cita para la cancelación."));
 
             entity.setStatus(AppointmentStatus.CANCELLED);
             entity.setCancellationDatetime(cancellationTime);
 
             repository.save(entity);
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
-        }
-        catch (Exception e) {
-            throw new InfrastructureException(e.getMessage(),500);
+            throw new PersistenceException(
+                    "Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
+        } catch (Exception e) {
+            throw new InfrastructureException(e.getMessage(), 500);
         }
     }
 
     @Override
     public boolean isDoctorOccupiedAt(UUID doctorId, LocalDateTime dateTime) {
         return repository.existsByDoctorDoctorIdAndAppointmentDatetimeAndStatus(
-            doctorId, 
-            dateTime, 
-            AppointmentStatus.PROGRAMMED
-        );
+                doctorId,
+                dateTime,
+                AppointmentStatus.PROGRAMMED);
     }
 
     @Override
-    public List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status, LocalDate startDate, LocalDate endDate) {
+    public List<Appointment> findAppointmentsByFilters(UUID doctorId, UUID patientId, String status,
+            LocalDate startDate, LocalDate endDate) {
         try {
             LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
             LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(23, 59, 59) : null;
@@ -148,10 +151,24 @@ public class AppointmentPersistenceAdapter implements AppointmentOutputPort {
                     .map(AppointmentMapperInfra::toDomain)
                     .toList();
         } catch (DataAccessException ex) {
-            throw new PersistenceException("Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
+            throw new PersistenceException(
+                    "Error al actualizar el estado de cancelación de la cita: " + ex.getMessage());
+        } catch (Exception e) {
+            throw new InfrastructureException(e.getMessage(), 500);
         }
-        catch (Exception e) {
-            throw new InfrastructureException(e.getMessage(),500);
-        }     
+    }
+
+    @Override
+    public Optional<Patient> findPatientById(UUID patientId) {
+        return patientRepository.findById(patientId)
+                .map(PatientMapperInfra::toDomain);
+    }
+
+    @Override
+    public boolean isPatientOccupiedAt(UUID patientId, LocalDateTime dateTime) {
+        return repository.existsByPatientPatientIdAndAppointmentDatetimeAndStatus(
+                patientId,
+                dateTime,
+                AppointmentStatus.PROGRAMMED);
     }
 }

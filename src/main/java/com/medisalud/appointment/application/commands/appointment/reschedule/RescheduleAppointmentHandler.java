@@ -14,7 +14,8 @@ import java.util.UUID;
 public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCase {
 
     private final AppointmentOutputPort appointmentOutputPort;
-    // Reutilizamos los handlers existentes para asegurar que se ejecuten TODAS sus reglas de negocio y penalizaciones
+    // Reutilizamos los handlers existentes para asegurar que se ejecuten TODAS sus
+    // reglas de negocio y penalizaciones
     private final CancelAppointmentHandler cancelHandler;
     private final CreateAppointmentHandler createHandler;
 
@@ -35,14 +36,23 @@ public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCas
         if (appointmentOutputPort.isDoctorOccupiedAt(oldAppointment.getDoctorId(), command.newScheduledAt())) {
             throw new ResourceConflictException("El doctor no está disponible en el nuevo horario solicitado.");
         }
-        
+
+        // RN-04: Uso de 409 Conflict por solapamiento de horarios del paciente en la
+        // nueva fecha
+        if (appointmentOutputPort.isPatientOccupiedAt(oldAppointment.getPatientId(), command.newScheduledAt())) {
+            throw new ResourceConflictException(
+                    "El paciente ya tiene una cita programada en el nuevo horario solicitado.");
+        }
+
+        // 3. Si todo está libre, procedemos a cancelar la cita previa
         cancelHandler.execute(command.appointmentId());
 
+        // 4. Creamos la nueva cita delegando al CreateAppointmentHandler (donde se
+        // validarán RN-03, sanciones, etc.)
         CreateAppointmentCommand createCommand = new CreateAppointmentCommand(
                 oldAppointment.getPatientId(),
                 oldAppointment.getDoctorId(),
-                command.newScheduledAt()
-        );
+                command.newScheduledAt());
 
         return createHandler.execute(createCommand);
     }
