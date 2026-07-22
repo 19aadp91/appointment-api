@@ -24,16 +24,16 @@ public final class AppointmentMapperInfra {
         if (domain == null) return null;
         
         AppointmentEntity entity = new AppointmentEntity();
-        entity.setAppointmentId(domain.getId());
-        entity.setAppointmentDatetime(domain.getScheduledAt());
-        entity.setStatus(domain.getStatus());
+        entity.setAppointmentId(domain.id());
+        entity.setAppointmentDatetime(domain.scheduledAt());
+        entity.setStatus(domain.status());
         
         DoctorEntity doctor = new DoctorEntity();
-        doctor.setDoctorId(domain.getDoctorId());
+        doctor.setDoctorId(domain.doctorId());
         entity.setDoctor(doctor);
         
         PatientEntity patient = new PatientEntity();
-        patient.setPatientId(domain.getPatientId());
+        patient.setPatientId(domain.patientId());
         entity.setPatient(patient);
         
         return entity;

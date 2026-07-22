@@ -29,6 +29,6 @@ public class CreateDoctorHandler implements CreateDoctorUseCase {
 
         Doctor savedDoctor = doctorOutputPort.save(doctor);
         
-        return savedDoctor.getId();
+        return savedDoctor.id();
     }
 }

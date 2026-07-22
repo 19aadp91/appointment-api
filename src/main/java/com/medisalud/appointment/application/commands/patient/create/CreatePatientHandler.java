@@ -33,6 +33,6 @@ public class CreatePatientHandler implements CreatePatientUseCase {
         Patient patient = PatientMapperAplication.toDomain(command);
         Patient savedPatient = patientOutputPort.save(patient);
 
-        return savedPatient.getId();
+        return savedPatient.id();
     }
 }

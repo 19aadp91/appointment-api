@@ -30,7 +30,7 @@ public class CreateAppointmentHandler implements CreateAppointmentUseCase {
                         String.format("El paciente con ID '%s' no existe.", command.patientId())));
 
         // RN-03: Validar que la fecha de nacimiento no sea futura
-        if (patient.getBirthDate() != null && patient.getBirthDate().isAfter(LocalDate.now())) {
+        if (patient.birthDate() != null && patient.birthDate().isAfter(LocalDate.now())) {
             throw new BusinessException("No se pueden agendar citas para pacientes con fecha de nacimiento futura.");
         }
 
@@ -65,6 +65,6 @@ public class CreateAppointmentHandler implements CreateAppointmentUseCase {
         Appointment appointment = AppointmentMapperAplication.toDomain(command);
         Appointment savedAppointment = appointmentOutputPort.save(appointment);
 
-        return savedAppointment.getId();
+        return savedAppointment.id();
     }
 }

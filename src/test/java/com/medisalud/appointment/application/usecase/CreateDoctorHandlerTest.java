@@ -52,7 +52,7 @@ class CreateDoctorHandlerTest {
         Doctor mockSavedDoctor = mock(Doctor.class);
         
         when(doctorOutputPort.existsByEmail(doctorEmail)).thenReturn(false);
-        when(mockSavedDoctor.getId()).thenReturn(expectedDoctorId);
+        when(mockSavedDoctor.id()).thenReturn(expectedDoctorId);
         // Usamos any(Doctor.class) ya que se mapea internamente dentro del método execute
         when(doctorOutputPort.save(any(Doctor.class))).thenReturn(mockSavedDoctor);
 

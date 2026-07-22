@@ -27,20 +27,20 @@ public class CancelAppointmentHandler implements CancelAppointmentUseCase {
                         String.format("No se encontró la cita con ID '%s'.", appointmentId)));
 
         // 2. Uso de 409 Conflict si el estado actual de la cita no permite cancelarla
-        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+        if (appointment.status() == AppointmentStatus.CANCELLED) {
             throw new ResourceConflictException("La cita ya está cancelada.");
         }
-        if (appointment.getStatus() == AppointmentStatus.ATTENDED) {
+        if (appointment.status() == AppointmentStatus.ATTENDED) {
             throw new ResourceConflictException("No se puede cancelar una cita que ya ha sido completada.");
         }
 
         LocalDateTime now = LocalDateTime.now();
 
-        long minutesToAppointment = ChronoUnit.MINUTES.between(now, appointment.getScheduledAt());
+        long minutesToAppointment = ChronoUnit.MINUTES.between(now, appointment.scheduledAt());
         if (minutesToAppointment < 120) {
             appointmentOutputPort.registerPenalty(
                 appointmentId,
-                appointment.getPatientId(), 
+                appointment.patientId(), 
                 "Cancelación tardía (Menos de 2 horas antes de la hora programada)"
             );
         }

@@ -26,11 +26,11 @@ public final class DoctorMapperInfra {
             return null;
         }
         DoctorEntity entity = new DoctorEntity();
-        entity.setDoctorId(domain.getId()); // maps id to doctorId
-        entity.setFullName(domain.getFullName());
-        entity.setSpecialty(domain.getSpecialty());
-        entity.setPhone(domain.getPhone());
-        entity.setEmail(domain.getEmail());
+        entity.setDoctorId(domain.id()); // maps id to doctorId
+        entity.setFullName(domain.fullName());
+        entity.setSpecialty(domain.specialty());
+        entity.setPhone(domain.phone());
+        entity.setEmail(domain.email());
         return entity;
     }
 }

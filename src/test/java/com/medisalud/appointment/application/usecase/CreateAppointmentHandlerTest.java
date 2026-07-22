@@ -71,7 +71,7 @@ class CreateAppointmentHandlerTest {
         when(appointmentOutputPort.isDoctorOccupiedAt(doctorId, appointmentDateTime)).thenReturn(false);
         when(appointmentOutputPort.isPatientOccupiedAt(patientId, appointmentDateTime)).thenReturn(false);
         when(appointmentOutputPort.countPenaltiesInLast30Days(eq(patientId), any(LocalDateTime.class))).thenReturn(1L);
-        when(mockSavedAppointment.getId()).thenReturn(expectedAppointmentId);
+        when(mockSavedAppointment.id()).thenReturn(expectedAppointmentId);
         when(appointmentOutputPort.save(any(Appointment.class))).thenReturn(mockSavedAppointment);
 
         // Act
@@ -145,7 +145,7 @@ class CreateAppointmentHandlerTest {
         when(appointmentOutputPort.isDoctorOccupiedAt(doctorId, appointmentDateTime)).thenReturn(false);
         when(appointmentOutputPort.isPatientOccupiedAt(patientId, appointmentDateTime)).thenReturn(false);
         when(appointmentOutputPort.countPenaltiesInLast30Days(eq(patientId), any(LocalDateTime.class))).thenReturn(0L);
-        when(mockSavedAppointment.getId()).thenReturn(expectedAppointmentId);
+        when(mockSavedAppointment.id()).thenReturn(expectedAppointmentId);
         when(appointmentOutputPort.save(any(Appointment.class))).thenReturn(mockSavedAppointment);
 
         // Act

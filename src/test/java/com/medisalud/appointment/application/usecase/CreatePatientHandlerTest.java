@@ -52,7 +52,7 @@ class CreatePatientHandlerTest {
 
         when(patientOutputPort.existsByDocumentNumber(documentNumber)).thenReturn(false);
         when(patientOutputPort.existsByEmail(patientEmail)).thenReturn(false);
-        when(mockSavedPatient.getId()).thenReturn(expectedPatientId);
+        when(mockSavedPatient.id()).thenReturn(expectedPatientId);
         when(patientOutputPort.save(any(Patient.class))).thenReturn(mockSavedPatient);
 
         // Act

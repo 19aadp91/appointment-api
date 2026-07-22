@@ -70,16 +70,16 @@ class RescheduleAppointmentHandlerTest {
         UUID newAppointmentId = UUID.randomUUID();
         Appointment mockNewAppointment = mock(Appointment.class);
 
-        when(mockOldAppointment.getDoctorId()).thenReturn(doctorId);
-        when(mockOldAppointment.getPatientId()).thenReturn(patientId);
+        when(mockOldAppointment.doctorId()).thenReturn(doctorId);
+        when(mockOldAppointment.patientId()).thenReturn(patientId);
 
         // Configuración para el Handler de reprogramación
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockOldAppointment));
         when(appointmentOutputPort.isDoctorOccupiedAt(eq(doctorId), any())).thenReturn(false);
 
         // Mocks requeridos internamente por CancelAppointmentHandler
-        when(mockOldAppointment.getStatus()).thenReturn(AppointmentStatus.PROGRAMMED);
-        when(mockOldAppointment.getScheduledAt()).thenReturn(LocalDateTime.now().plusHours(5));
+        when(mockOldAppointment.status()).thenReturn(AppointmentStatus.PROGRAMMED);
+        when(mockOldAppointment.scheduledAt()).thenReturn(LocalDateTime.now().plusHours(5));
 
         // Mocks requeridos internamente por CreateAppointmentHandler usando
         // findPatientById
@@ -88,7 +88,7 @@ class RescheduleAppointmentHandlerTest {
         when(appointmentOutputPort.isPatientOccupiedAt(eq(patientId), any())).thenReturn(false);
         when(appointmentOutputPort.countPenaltiesInLast30Days(eq(patientId), any(LocalDateTime.class))).thenReturn(0L);
 
-        when(mockNewAppointment.getId()).thenReturn(newAppointmentId);
+        when(mockNewAppointment.id()).thenReturn(newAppointmentId);
         when(appointmentOutputPort.save(any(Appointment.class))).thenReturn(mockNewAppointment);
 
         // Act
@@ -121,7 +121,7 @@ class RescheduleAppointmentHandlerTest {
     @DisplayName("Should throw ResourceConflictException when the doctor is occupied at the new time slot")
     void throwConflictWhenDoctorIsOccupied() {
         // Arrange
-        when(mockOldAppointment.getDoctorId()).thenReturn(doctorId);
+        when(mockOldAppointment.doctorId()).thenReturn(doctorId);
 
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockOldAppointment));
         when(appointmentOutputPort.isDoctorOccupiedAt(doctorId, newDateTime)).thenReturn(true);
@@ -140,12 +140,12 @@ class RescheduleAppointmentHandlerTest {
     @DisplayName("Should bubble up exception when internal cancelHandler fails (e.g. Appointment already Attended)")
     void throwExceptionWhenInternalCancellationFails() {
         // Arrange
-        when(mockOldAppointment.getDoctorId()).thenReturn(doctorId);
+        when(mockOldAppointment.doctorId()).thenReturn(doctorId);
 
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockOldAppointment));
         when(appointmentOutputPort.isDoctorOccupiedAt(doctorId, newDateTime)).thenReturn(false);
 
-        when(mockOldAppointment.getStatus()).thenReturn(AppointmentStatus.ATTENDED);
+        when(mockOldAppointment.status()).thenReturn(AppointmentStatus.ATTENDED);
 
         // Act & Assert
         ResourceConflictException exception = assertThrows(ResourceConflictException.class,

@@ -33,13 +33,13 @@ public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCas
                         String.format("No se encontró la cita con ID '%s'.", command.appointmentId())));
 
         // 2. Uso de 409 Conflict por solapamiento de horarios del médico
-        if (appointmentOutputPort.isDoctorOccupiedAt(oldAppointment.getDoctorId(), command.newScheduledAt())) {
+        if (appointmentOutputPort.isDoctorOccupiedAt(oldAppointment.doctorId(), command.newScheduledAt())) {
             throw new ResourceConflictException("El doctor no está disponible en el nuevo horario solicitado.");
         }
 
         // RN-04: Uso de 409 Conflict por solapamiento de horarios del paciente en la
         // nueva fecha
-        if (appointmentOutputPort.isPatientOccupiedAt(oldAppointment.getPatientId(), command.newScheduledAt())) {
+        if (appointmentOutputPort.isPatientOccupiedAt(oldAppointment.patientId(), command.newScheduledAt())) {
             throw new ResourceConflictException(
                     "El paciente ya tiene una cita programada en el nuevo horario solicitado.");
         }
@@ -50,8 +50,8 @@ public class RescheduleAppointmentHandler implements RescheduleAppointmentUseCas
         // 4. Creamos la nueva cita delegando al CreateAppointmentHandler (donde se
         // validarán RN-03, sanciones, etc.)
         CreateAppointmentCommand createCommand = new CreateAppointmentCommand(
-                oldAppointment.getPatientId(),
-                oldAppointment.getDoctorId(),
+                oldAppointment.patientId(),
+                oldAppointment.doctorId(),
                 command.newScheduledAt());
 
         return createHandler.execute(createCommand);

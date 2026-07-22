@@ -15,12 +15,12 @@ public class PatientMapperInfra {
     public static PatientEntity toEntity(Patient domain) {
         if (domain == null) return null;
         PatientEntity entity = new PatientEntity();
-        entity.setPatientId(domain.getId());
-        entity.setFullName(domain.getFullName());
-        entity.setDocumentNumber(domain.getDocumentNumber());
-        entity.setPhone(domain.getPhone());
-        entity.setEmail(domain.getEmail());
-        entity.setBirthDate(domain.getBirthDate());
+        entity.setPatientId(domain.id());
+        entity.setFullName(domain.fullName());
+        entity.setDocumentNumber(domain.documentNumber());
+        entity.setPhone(domain.phone());
+        entity.setEmail(domain.email());
+        entity.setBirthDate(domain.birthDate());
         return entity;
     }
 

@@ -40,9 +40,9 @@ class CancelAppointmentUseCaseTest {
         UUID appointmentId = UUID.randomUUID();
         Appointment mockAppointment = mock(Appointment.class);
         
-        when(mockAppointment.getStatus()).thenReturn(AppointmentStatus.PROGRAMMED);
+        when(mockAppointment.status()).thenReturn(AppointmentStatus.PROGRAMMED);
         // Agendada para dentro de 5 horas (mucho más de las 2 horas límite)
-        when(mockAppointment.getScheduledAt()).thenReturn(LocalDateTime.now().plusHours(5));
+        when(mockAppointment.scheduledAt()).thenReturn(LocalDateTime.now().plusHours(5));
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockAppointment));
 
         // Act
@@ -61,10 +61,10 @@ class CancelAppointmentUseCaseTest {
         UUID patientId = UUID.randomUUID();
         Appointment mockAppointment = mock(Appointment.class);
 
-        when(mockAppointment.getStatus()).thenReturn(AppointmentStatus.PROGRAMMED);
-        when(mockAppointment.getPatientId()).thenReturn(patientId);
+        when(mockAppointment.status()).thenReturn(AppointmentStatus.PROGRAMMED);
+        when(mockAppointment.patientId()).thenReturn(patientId);
         // Agendada para dentro de 30 minutos (menos de las 2 horas límite)
-        when(mockAppointment.getScheduledAt()).thenReturn(LocalDateTime.now().plusMinutes(30));
+        when(mockAppointment.scheduledAt()).thenReturn(LocalDateTime.now().plusMinutes(30));
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockAppointment));
 
         // Act
@@ -101,7 +101,7 @@ class CancelAppointmentUseCaseTest {
         UUID appointmentId = UUID.randomUUID();
         Appointment mockAppointment = mock(Appointment.class);
 
-        when(mockAppointment.getStatus()).thenReturn(AppointmentStatus.CANCELLED);
+        when(mockAppointment.status()).thenReturn(AppointmentStatus.CANCELLED);
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockAppointment));
 
         // Act & Assert
@@ -119,7 +119,7 @@ class CancelAppointmentUseCaseTest {
         UUID appointmentId = UUID.randomUUID();
         Appointment mockAppointment = mock(Appointment.class);
 
-        when(mockAppointment.getStatus()).thenReturn(AppointmentStatus.ATTENDED);
+        when(mockAppointment.status()).thenReturn(AppointmentStatus.ATTENDED);
         when(appointmentOutputPort.findById(appointmentId)).thenReturn(Optional.of(mockAppointment));
 
         // Act & Assert
